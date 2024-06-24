@@ -55,9 +55,21 @@ public class FilmController {
     }
 
     private void checkValid(@Valid Film film) {
+        if (film.getName().isEmpty() || film.getName() == null) {
+            log.info("Название фильма не может быть пустым! Фильм: {}", film);
+            throw new ValidationException("Название фильма не может быть пустым!");
+        }
+        if (film.getDescription().length() > 200) {
+            log.info("Превышена максимальная длина описания фильма (200 символов). Фильм: {}", film);
+            throw new ValidationException("Превышена максимальная длина описания фильма (200 символов)");
+        }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, DECEMBER, 28))) {
             log.info("Дата релиза фильма не может быть раньше 28 декабря 1895 года. Фильм: {}", film);
             throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года");
+        }
+        if (film.getDuration() < 0) {
+            log.info("Продолжительность фильма не может быть отрицательным числом. Фильм: {}", film);
+            throw new ValidationException("Продолжительность фильма не может быть отрицательным числом");
         }
     }
 }
