@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,10 +20,27 @@ public class UserService {
 
     private final UserStorage userStorage;
 
+    public Collection<User> getAllUsers() {
+        log.info("Получаем список всех пользователей из хранилища");
+        return userStorage.getAllUsers();
+    }
+
+    public User addNewUser(User user) {
+        checkValidStorage(user);
+        log.info("Добавляем нового пользователя в хранилище");
+        return userStorage.addNewUser(user);
+    }
+
+    public User updateUser(User updatedUser) {
+        checkValidStorage(updatedUser);
+        log.info("Обновляем пользователя в хранилище");
+        return userStorage.updateUser(updatedUser);
+    }
+
     public void addNewFriend(Long userId, Long friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
-        checkValid(existUser, newFriend);
+        checkValidService(existUser, newFriend);
 
         existUser.getFriends().add(friendId);
         newFriend.getFriends().add(userId);
@@ -33,7 +52,7 @@ public class UserService {
     public void deleteFriend(Long userId, Long friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
-        checkValid(existUser, newFriend);
+        checkValidService(existUser, newFriend);
 
         existUser.getFriends().remove(friendId);
         newFriend.getFriends().remove(userId);
@@ -57,7 +76,7 @@ public class UserService {
     public Collection<User> getCommonFriendsList(Long userId, Long friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
-        checkValid(existUser, newFriend);
+        checkValidService(existUser, newFriend);
 
         Set<Long> userFriendsList = existUser.getFriends();
         Set<Long> friendFriendsList = newFriend.getFriends();
@@ -71,7 +90,26 @@ public class UserService {
         return commonFriends;
     }
 
-    private void checkValid(User existUser, User newFriend) {
+    public void checkValidStorage(User user) {
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            log.info("Проверьте правильность заполнения Email пользователя: {}", user);
+            throw new ValidationException("Проверьте правильность заполнения Email!");
+        }
+        if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()) {
+            log.info("Проверьте правильность заполнения Login пользователя: {}", user);
+            throw new ValidationException("Проверьте правильность заполнения Login!");
+        }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+            log.info("В качестве имени пользователя будет использован его логин: {}", user);
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.info("Дата рождения пользователя не может быть в будущем: {}", user);
+            throw new ValidationException("Дата рождения пользователя не может быть в будущем!");
+        }
+    }
+
+    private void checkValidService(User existUser, User newFriend) {
         if (existUser == null) {
             throw new NotFoundException("Пользователь не найден");
         }
@@ -86,3 +124,5 @@ public class UserService {
         }
     }
 }
+
+
