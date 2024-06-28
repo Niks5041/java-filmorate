@@ -1,73 +1,84 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
+@AllArgsConstructor
 public class UserController {
-    private long generatorId = 0;
-    private final Map<Long, User> users = new HashMap<>();
+
+    private final UserService userService;
+
+    // Методы для работы с пользователями
 
     @GetMapping
-    public ResponseEntity<Collection<User>> getAllUsers() {
-        log.info("Запрос на получение списка всех пользователей");
-        Collection<User> allUsers = users.values();
-        return ResponseEntity.ok().body(allUsers);
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<User> getAllUsers() {
+        log.info("Пришел GET запрос /users");
+        Collection<User> users = userService.getAllUsers();
+        log.info("Отправлен ответ GET /users с телом: {}", users);
+        return users;
     }
 
     @PostMapping
-    public ResponseEntity<User> addNewUser(@Valid @RequestBody User user) {
-        log.info("Получен запрос на добавление нового пользователя: {}", user);
-        checkValid(user);
-        user.setId(++generatorId);
-        users.put(user.getId(), user);
-        log.info("Пользователь успешно добавлен: {}", user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    @ResponseStatus(HttpStatus.CREATED)
+    public User addNewUser(@RequestBody User user) {
+        log.info("Пришел POST запрос /users с телом: {}", user);
+        User addedUser = userService.addNewUser(user);
+        log.info("Отправлен ответ POST /users с телом: {}", addedUser);
+        return addedUser;
     }
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User updatedUser) {
-        log.info("Получен запрос на обновление информации о пользователе с ID: {}", updatedUser.getId());
-        User oldUser = users.get(updatedUser.getId());
-        if (oldUser == null) {
-            log.info("Пользователь с ID {} не найден!", updatedUser.getId());
-            throw new NotFoundException("Пользователь с ID " + updatedUser.getId() + " не найден!");
-        }
-        checkValid(updatedUser);
-        users.put(updatedUser.getId(), updatedUser);
-        log.info("Информация о пользователе успешно обновлена: {}", updatedUser);
-        return ResponseEntity.ok().body(updatedUser);
+    @ResponseStatus(HttpStatus.OK)
+    public User updateUser(@RequestBody User updatedUser) {
+        log.info("Пришел PUT запрос /users с телом: {}", updatedUser);
+        User updated = userService.updateUser(updatedUser);
+        log.info("Отправлен ответ PUT /users с телом: {}", updated);
+        return updated;
     }
 
-    private void checkValid(User user) {
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            log.info("Проверьте правильность заполнения Email пользователя: {}", user);
-            throw new ValidationException("Проверьте правильность заполнения Email!");
-        }
-        if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()) {
-            log.info("Проверьте правильность заполнения Login пользователя: {}", user);
-            throw new ValidationException("Проверьте правильность заполнения Login!");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-            log.info("В качестве имени пользователя будет использован его логин: {}", user);
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.info("Дата рождения пользователя не может быть в будущем: {}", user);
-            throw new ValidationException("Дата рождения пользователя не может быть в будущем!");
-        }
+    // Методы для работы с друзьями пользователя
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        log.info("Пришел PUT запрос /users/{}/friends/{}", userId, friendId);
+        userService.addNewFriend(userId, friendId);
+        log.info("Отправлен ответ PUT /users/{}/friends/{}", userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        log.info("Пришел DELETE запрос /users/{}/friends/{}", userId, friendId);
+        userService.deleteFriend(userId, friendId);
+        log.info("Отправлен ответ DELETE /users/{}/friends/{}", userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<User> getFriendsList(@PathVariable Long userId) {
+        log.info("Пришел GET запрос /users/{}/friends", userId);
+        Collection<User> friends = userService.getFriendsList(userId);
+        log.info("Отправлен ответ GET /users/{}/friends: {}", userId, friends);
+        return friends;
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<User> getCommonFriendsList(@PathVariable Long userId, @PathVariable Long otherId) {
+        log.info("Пришел GET запрос /users/{}/friends/common/{}", userId, otherId);
+        Collection<User> commonFriends = userService.getCommonFriendsList(userId, otherId);
+        log.info("Отправлен ответ GET /users/{}/friends/common/{}: {}", userId, otherId, commonFriends);
+        return commonFriends;
     }
 }
