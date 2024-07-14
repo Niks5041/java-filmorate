@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.users.User;
+import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -19,49 +22,61 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
 
-    public Collection<User> getAllUsers() {
+    public Collection<UserDto> getAllUsers() {
         log.info("Получаем список всех пользователей из хранилища");
-        return userStorage.getAllUsers();
+        return userStorage.getAllUsers()
+                .stream()
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
-    public User addNewUser(User user) {
-        checkValidStorage(user);
+    public UserDto addNewUser(User user) {
+        validateUser(user);
         log.info("Добавляем нового пользователя в хранилище");
-        return userStorage.addNewUser(user);
+        return UserMapper.mapToUserDto(userStorage.addNewUser(user));
+
     }
 
-    public User updateUser(User updatedUser) {
-        checkValidStorage(updatedUser);
+    public UserDto updateUser(User updatedUser) {
+        validateUser(updatedUser);
         log.info("Обновляем пользователя в хранилище");
-        return userStorage.updateUser(updatedUser);
+        return UserMapper.mapToUserDto(userStorage.updateUser(updatedUser));
     }
 
-    public void addNewFriend(Long userId, Long friendId) {
+    public void addNewFriend(Integer userId, Integer friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
         checkValidService(existUser, newFriend);
 
         existUser.getFriends().add(friendId);
-        newFriend.getFriends().add(userId);
         userStorage.updateUser(existUser);
-        userStorage.updateUser(newFriend);
-        log.info("Пользователь с ID {} добавлен в друзья к пользователю с ID {}", friendId, userId);
+        log.info("Пользователь с ID {} отправил запрос на добавление в друзья к пользователю ID {}", userId, friendId);
+
+        if (newFriend.getFriends().contains(existUser.getId())) {
+            newFriend.getFriends().add(userId);
+            userStorage.updateUser(newFriend);
+            log.info("Пользователь с ID {} добавлен в друзья к пользователю с ID {}", userId, friendId);
+        }
+        friendStorage.addFriendship(userId, friendId);
     }
 
-    public void deleteFriend(Long userId, Long friendId) {
+    public void deleteFriend(Integer userId, Integer friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
         checkValidService(existUser, newFriend);
 
+        friendStorage.deleteFriendship(userId, friendId);
         existUser.getFriends().remove(friendId);
         newFriend.getFriends().remove(userId);
+
         userStorage.updateUser(existUser);
         userStorage.updateUser(newFriend);
         log.info("Пользователь с ID {}, удален из друзей  пользователю с ID {}", friendId, userId);
     }
 
-    public Collection<User> getFriendsList(Long userId) {
+    public Collection<UserDto> getFriendsList(Integer userId) {
         User existUser = userStorage.findUserById(userId);
         if (existUser == null) {
             throw new NotFoundException("Пользователь не найден");
@@ -70,38 +85,40 @@ public class UserService {
         log.info("Получен список друзей пользователя с ID {}", existUser.getId());
         return existUser.getFriends().stream()
                 .map(userStorage::findUserById)
+                .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
     }
 
-    public Collection<User> getCommonFriendsList(Long userId, Long friendId) {
+    public Collection<UserDto> getCommonFriendsList(Integer userId, Integer friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
         checkValidService(existUser, newFriend);
 
-        Set<Long> userFriendsList = existUser.getFriends();
-        Set<Long> friendFriendsList = newFriend.getFriends();
+        Set<Integer> userFriendsList = existUser.getFriends();
+        Set<Integer> friendFriendsList = newFriend.getFriends();
         userFriendsList.retainAll(friendFriendsList);
 
-        Set<User> commonFriends = userFriendsList.stream()
+        Set<UserDto> commonFriends = userFriendsList.stream()
                 .map(userStorage::findUserById)
+                .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toSet());
-        log.info("Получен список общих друзей пользовтеля с ID {} с пользовтелем с ID {}", userId, friendId);
 
+        log.info("Получен список общих друзей между пользователями с ID {} и {}: {}", userId, friendId, commonFriends);
         return commonFriends;
     }
 
-    public void checkValidStorage(User user) {
+    public void validateUser(User user) {
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             log.info("Проверьте правильность заполнения Email пользователя: {}", user);
             throw new ValidationException("Проверьте правильность заполнения Email!");
         }
-        if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()) {
-            log.info("Проверьте правильность заполнения Login пользователя: {}", user);
-            throw new ValidationException("Проверьте правильность заполнения Login!");
-        }
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
             log.info("В качестве имени пользователя будет использован его логин: {}", user);
+        }
+        if (user.getLogin() == null || user.getLogin().isEmpty()) {
+            log.info("Проверьте правильность заполнения Login пользователя: {}", user);
+            throw new ValidationException("Проверьте правильность заполнения Login!");
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.info("Дата рождения пользователя не может быть в будущем: {}", user);
