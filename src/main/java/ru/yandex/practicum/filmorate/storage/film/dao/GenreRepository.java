@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -18,6 +19,10 @@ public class GenreRepository extends BaseRepository<Genre> implements GenreStora
 
     private static final String FIND_GENRE_BY_ID = "SELECT * FROM genres WHERE id = ?";
     private static final String FIND_ALL_GENRES = "SELECT * FROM genres ORDER BY id LIMIT 6";
+    private static final String UPDATE_GENRE = "SELECT g.id, g.name " +
+            "FROM genres g " +
+            "JOIN film_genre fg ON g.id = fg.genre_id " +
+            "WHERE fg.film_id = ?";
 
     public GenreRepository(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper);
@@ -37,4 +42,11 @@ public class GenreRepository extends BaseRepository<Genre> implements GenreStora
         log.info("Поиск жанра по ID в базе данных: {}", id);
         return findOne(FIND_GENRE_BY_ID, id);
     }
+
+    @Override
+    public List<Genre> getGenreByFilmId(Integer id) {
+        log.info("Получаем фильм c ID в базу данных жанров");
+        return findMany(UPDATE_GENRE, id);
+    }
 }
+

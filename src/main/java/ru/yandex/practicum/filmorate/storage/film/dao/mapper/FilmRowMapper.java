@@ -29,11 +29,6 @@ public class FilmRowMapper implements RowMapper<Film> {
         mpa.setId(resultSet.getInt("mpa_id"));
         film.setMpa(mpa);
 
-//        List<Genre> genreSet = new LinkedList<>();
-//        Genre genre = new Genre();
-//        genreSet.add(genre);
-//        film.setGenres(genreSet);
-
         return film;
     }
 }
