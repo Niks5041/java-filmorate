@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,20 +50,9 @@ public class UserService {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
         checkValidService(existUser, newFriend);
-
-//        existUser.getFriends().add(friendId);
-//        userStorage.updateUser(existUser);
-
         log.info("Пользователь с ID {} отправил запрос на добавление в друзья к пользователю ID {}", userId, friendId);
 
-//        if (newFriend.getFriends().contains(existUser.getId())) {
-//            newFriend.getFriends().add(userId);
-//            userStorage.updateUser(newFriend);
-//            log.info("Пользователь с ID {} добавлен в друзья к пользователю с ID {}", userId, friendId);
-//        }
-
         Friend friend = friendStorage.findFriendByUserId(friendId, userId);
-
         if (friend != null) {
             friend.setFriendId(userId);
             friend.setFriendship(true);
@@ -72,57 +60,46 @@ public class UserService {
         } else {
             friendStorage.addFriendship(userId, friendId);
         }
-
-
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
         checkValidService(existUser, newFriend);
+        log.info("Пользователь с ID {} отправил запрос на удаление из друзей пользователя с ID {}", userId, friendId);
 
-        friendStorage.deleteFriendship(userId, friendId);
-        existUser.getFriends().remove(friendId);
-        newFriend.getFriends().remove(userId);
-
-        userStorage.updateUser(existUser);
-        userStorage.updateUser(newFriend);
-        log.info("Пользователь с ID {}, удален из друзей  пользователю с ID {}", friendId, userId);
+        Friend friend = friendStorage.findFriendByUserId(userId, friendId);
+        if (friend != null) {
+            friendStorage.deleteFriendship(userId, friendId);
+            log.info("Дружба между пользователями с ID {} и {} успешно удалена", userId, friendId);
+        } else {
+            log.info("Дружба между пользователями с ID {} и {} не найдена для удаления", userId, friendId);
+        }
     }
 
-    public Collection<UserDto> getFriendsList(Integer userId) {
+    public List<UserDto> getFriendsList(Integer userId) {
         User existUser = userStorage.findUserById(userId);
         if (existUser == null) {
             throw new NotFoundException("Пользователь не найден");
         }
 
         log.info("Получен список друзей пользователя с ID {}", existUser.getId());
-
-            return friendStorage.findAllFriendsByUserId(userId).stream()
-                    .map(friend -> {
-                        if (friend.getFriendId().equals(userId)) {
-                           return friend.getUserId();
-                        }
-                        return friend.getFriendId();
-                    })
-                    .map(userStorage::findUserById)
-                    .map(UserMapper::mapToUserDto)
-                    .collect(Collectors.toList());
+        return friendStorage.findAllFriendsByUserId(userId).stream()
+                .map(friend -> {
+                    if (friend.getFriendId().equals(userId)) {
+                        return friend.getUserId();
+                    }
+                    return friend.getFriendId();
+                })
+                .map(userStorage::findUserById)
+                .map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
-    public Collection<UserDto> getCommonFriendsList(Integer userId, Integer friendId) {
+    public List<UserDto> getCommonFriendsList(Integer userId, Integer friendId) {
         User existUser = userStorage.findUserById(userId);
         User newFriend = userStorage.findUserById(friendId);
         checkValidService(existUser, newFriend);
-//
-//        Set<Integer> userFriendsList = existUser.getFriends();
-//        Set<Integer> friendFriendsList = newFriend.getFriends();
-//        userFriendsList.retainAll(friendFriendsList);
-//
-//        Set<UserDto> commonFriends = userFriendsList.stream()
-//                .map(userStorage::findUserById)
-//                .map(UserMapper::mapToUserDto)
-//                .collect(Collectors.toSet());
 
         List<UserDto> commonFriends = friendStorage.findAllFriendsByUserId(userId).stream()
                 .map(friend -> {
@@ -177,12 +154,6 @@ public class UserService {
         }
         if (newFriend == null) {
             throw new NotFoundException("Друг пользователя не найден");
-        }
-        if (newFriend.getFriends() == null) {
-            throw new NotFoundException("Список друзей не найден");
-        }
-        if (existUser.getFriends() == null) {
-            throw new NotFoundException("Список друзей не найден");
         }
     }
 }

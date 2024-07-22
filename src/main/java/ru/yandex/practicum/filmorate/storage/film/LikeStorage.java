@@ -8,5 +8,5 @@ public interface LikeStorage {
     void addLike(Like like);
 
     void deleteLike(Integer filmId, Integer userId);
-    Collection<Like> findAllByFilmId(Integer filmId);
+//    Collection<Like> findAllByFilmId(Integer filmId);
 }

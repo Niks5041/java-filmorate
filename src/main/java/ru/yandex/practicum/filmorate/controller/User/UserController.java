@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -67,18 +68,18 @@ public class UserController {
 
     @GetMapping("/{userId}/friends")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<UserDto> getFriendsList(@PathVariable Integer userId) {
+    public List<UserDto> getFriendsList(@PathVariable Integer userId) {
         log.info("Пришел GET запрос /users/{}/friends", userId);
-        Collection<UserDto> friends = userService.getFriendsList(userId);
+        List<UserDto> friends = userService.getFriendsList(userId);
         log.info("Отправлен ответ GET /users/{}/friends: {}", userId, friends);
         return friends;
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<UserDto> getCommonFriendsList(@PathVariable Integer userId, @PathVariable Integer otherId) {
+    public List<UserDto> getCommonFriendsList(@PathVariable Integer userId, @PathVariable Integer otherId) {
         log.info("Пришел GET запрос /users/{}/friends/common/{}", userId, otherId);
-        Collection<UserDto> commonFriends = userService.getCommonFriendsList(userId, otherId);
+        List<UserDto> commonFriends = userService.getCommonFriendsList(userId, otherId);
         log.info("Отправлен ответ GET /users/{}/friends/common/{}: {}", userId, otherId, commonFriends);
         return commonFriends;
     }

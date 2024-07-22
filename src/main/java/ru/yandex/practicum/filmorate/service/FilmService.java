@@ -75,10 +75,10 @@ public class FilmService {
     public FilmDto updateFilm(Film updatedFilm) {
         filmValid(updatedFilm);
 
-        User existUser = userStorage.findUserById(updatedFilm.getId());
-        if (existUser == null) {
-            throw new NotFoundException("Пользователь с ID " + updatedFilm.getId() + " не найден");
-        }
+//        Film existFilm = filmStorage.findFilmById(updatedFilm.getId());
+//        if (existFilm == null) {
+//            throw new NotFoundException("Фильм с ID " + updatedFilm.getId() + " не найден");
+//        }
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.updateFilm(updatedFilm));
         Mpa mpa = mpaStorage.findRatingById(updatedFilm.getMpa().getId());
@@ -113,16 +113,10 @@ public class FilmService {
     }
 
     public Collection<FilmDto> getListOfPopularFilms(Integer count) {
-        Collection<Film> films = filmStorage.getAllFilms();
-
-        List<FilmDto> popularFilms = films.stream()
-                .map(film -> {
-                    int likeCount = likeStorage.findAllByFilmId(film.getId()).size();
-                    return new AbstractMap.SimpleEntry<>(film, likeCount);
-                })
-                .sorted((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()))
+        Collection<FilmDto> popularFilms = filmStorage.getAllFilms().stream()
+                .filter(film -> film.getLike() != null)
+                .sorted((film1, film2) -> Integer.compare(film2.getLike().size(), film1.getLike().size()))
                 .limit(count == null ? 10 : count)
-                .map(Map.Entry::getKey)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
 
@@ -183,16 +177,6 @@ public class FilmService {
         if (film.getMpa().getId() > ratings.size()) {
             log.info("Такого рейтинга нет в базе данных", film.getMpa().getId());
             throw new ValidationException("Такого рейтинга нет в базе данных");
-        }
-        Collection<Integer> genreIds = film.getGenres()
-                .stream()
-                .map(Genre::getId)
-                .collect(Collectors.toList());
-        for (Integer genreId : genreIds) {
-            if (genreId > genreStorage.getAllGenres().size()) {
-                log.info("Такого жанра нет в базе данных {}", genreId);
-                throw new ValidationException("Проветье жанр фильма");
-            }
         }
     }
 

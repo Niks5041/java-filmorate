@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.model.films.Like;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 
-import java.util.Collection;
-
 @Repository
 @Slf4j
 public class LikeRepository extends BaseRepository<Like> implements LikeStorage {
@@ -38,9 +36,9 @@ public class LikeRepository extends BaseRepository<Like> implements LikeStorage 
         jdbc.update(DELETE_LIKE, filmId, userId);
     }
 
-    @Override
-    public Collection<Like> findAllByFilmId(Integer filmId) {
-        log.info("Поиск всех лайков для фильма с ID {}", filmId);
-        return findMany(FIND_ALL_BY_FILM_ID, filmId);
-    }
+//    @Override
+//    public Collection<Like> findAllByFilmId(Integer filmId) {
+//        log.info("Поиск всех лайков для фильма с ID {}", filmId);
+//        return findMany(FIND_ALL_BY_FILM_ID, filmId);
+//    }
 }
