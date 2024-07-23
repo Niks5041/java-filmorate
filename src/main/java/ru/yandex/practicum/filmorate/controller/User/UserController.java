@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.controller.User;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.users.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -15,6 +17,7 @@ import java.util.List;
 @RequestMapping("/users")
 @Slf4j
 @AllArgsConstructor
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -22,7 +25,6 @@ public class UserController {
     // Методы для работы с пользователями
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public Collection<UserDto> getAllUsers() {
         log.info("Пришел GET запрос /users");
         Collection<UserDto> users = userService.getAllUsers();
@@ -32,7 +34,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto addNewUser(@RequestBody User user) {
+    public UserDto addNewUser(@RequestBody @Valid User user) {
         log.info("Пришел POST запрос /users с телом: {}", user);
         UserDto addedUser = userService.addNewUser(user);
         log.info("Отправлен ответ POST /users с телом: {}", addedUser);
@@ -40,8 +42,7 @@ public class UserController {
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
-    public UserDto updateUser(@RequestBody User updatedUser) {
+    public UserDto updateUser(@RequestBody @Valid User updatedUser) {
         log.info("Пришел PUT запрос /users с телом: {}", updatedUser);
         UserDto updated = userService.updateUser(updatedUser);
         log.info("Отправлен ответ PUT /users с телом: {}", updated);
@@ -51,7 +52,6 @@ public class UserController {
     // Методы для работы с друзьями пользователя
 
     @PutMapping("/{userId}/friends/{friendId}")
-    @ResponseStatus(HttpStatus.OK)
     public void addFriend(@PathVariable Integer userId, @PathVariable Integer friendId) {
         log.info("Пришел PUT запрос /users/{}/friends/{}", userId, friendId);
         userService.addNewFriend(userId, friendId);
@@ -59,7 +59,6 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    @ResponseStatus(HttpStatus.OK)
     public void deleteFriend(@PathVariable Integer userId, @PathVariable Integer friendId) {
         log.info("Пришел DELETE запрос /users/{}/friends/{}", userId, friendId);
         userService.deleteFriend(userId, friendId);
@@ -67,7 +66,6 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends")
-    @ResponseStatus(HttpStatus.OK)
     public List<UserDto> getFriendsList(@PathVariable Integer userId) {
         log.info("Пришел GET запрос /users/{}/friends", userId);
         List<UserDto> friends = userService.getFriendsList(userId);
@@ -76,7 +74,6 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    @ResponseStatus(HttpStatus.OK)
     public List<UserDto> getCommonFriendsList(@PathVariable Integer userId, @PathVariable Integer otherId) {
         log.info("Пришел GET запрос /users/{}/friends/common/{}", userId, otherId);
         List<UserDto> commonFriends = userService.getCommonFriendsList(userId, otherId);

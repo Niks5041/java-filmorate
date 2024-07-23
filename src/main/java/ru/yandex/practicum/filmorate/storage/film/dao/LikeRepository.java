@@ -13,12 +13,6 @@ import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 public class LikeRepository extends BaseRepository<Like> implements LikeStorage {
     private static final String ADD_LIKE = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
     private static final String DELETE_LIKE = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
-    private static final String FIND_ALL_BY_FILM_ID = "SELECT f.id, f.name, f.description, f.releaseDate, f.duration, f.mpa_id " +
-            "FROM film f " +
-            "JOIN likes l ON f.id = l.film_id " +
-            "WHERE f.id = ? " +
-            "ORDER BY COUNT(l.id) DESC";
-
 
     public LikeRepository(JdbcTemplate jdbc, RowMapper<Like> mapper) {
         super(jdbc, mapper);
@@ -35,10 +29,4 @@ public class LikeRepository extends BaseRepository<Like> implements LikeStorage 
         log.info("Удаление лайка из базы данных: filmId={}, userId={}", filmId, userId);
         jdbc.update(DELETE_LIKE, filmId, userId);
     }
-
-//    @Override
-//    public Collection<Like> findAllByFilmId(Integer filmId) {
-//        log.info("Поиск всех лайков для фильма с ID {}", filmId);
-//        return findMany(FIND_ALL_BY_FILM_ID, filmId);
-//    }
 }

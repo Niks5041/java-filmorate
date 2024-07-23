@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.controller.Film;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.films.Genre;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -18,7 +20,6 @@ public class GenreController {
     private final FilmService filmService;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public Collection<Genre> getAllGenres() {
         log.info("Пришел GET запрос /genres");
         Collection<Genre> genres = filmService.getAllGenres();
@@ -27,7 +28,6 @@ public class GenreController {
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public Genre getGenreById(@PathVariable Integer id) {
         log.info("Пришел GET запрос /genres/{}", id);
         Genre genre = filmService.getGenreById(id);

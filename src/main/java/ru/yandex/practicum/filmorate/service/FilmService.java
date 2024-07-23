@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.films.*;
+import ru.yandex.practicum.filmorate.model.films.Film;
+import ru.yandex.practicum.filmorate.model.films.Genre;
+import ru.yandex.practicum.filmorate.model.films.Like;
+import ru.yandex.practicum.filmorate.model.films.Mpa;
 import ru.yandex.practicum.filmorate.model.users.User;
-
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
@@ -16,11 +18,10 @@ import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.time.Month.DECEMBER;
 
 @Slf4j
 @Service
@@ -37,8 +38,9 @@ public class FilmService {
         log.info("Получаем фильм по id: {} из хранилища", id);
 
         Film film = filmStorage.findFilmById(id);
+        genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
-        List<Genre> genres = new LinkedList<>(genreStorage.getGenreByFilmId(id));
+        Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(id));
 
         film.setGenres(genres);
         film.setMpa(mpa);
@@ -62,8 +64,9 @@ public class FilmService {
         filmValid(film);
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.addNewFilm(film));
+        genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
-        List<Genre> genres = new LinkedList<>(genreStorage.getGenreByFilmId(filmDto.getId()));
+        Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(filmDto.getId()));
 
         filmDto.setMpa(mpa);
         filmDto.setGenres(genres);
@@ -75,12 +78,8 @@ public class FilmService {
     public FilmDto updateFilm(Film updatedFilm) {
         filmValid(updatedFilm);
 
-//        Film existFilm = filmStorage.findFilmById(updatedFilm.getId());
-//        if (existFilm == null) {
-//            throw new NotFoundException("Фильм с ID " + updatedFilm.getId() + " не найден");
-//        }
-
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.updateFilm(updatedFilm));
+        genreStorage.addFilmToGenres(updatedFilm.getId(), updatedFilm.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         Mpa mpa = mpaStorage.findRatingById(updatedFilm.getMpa().getId());
 
         filmDto.setMpa(mpa);
@@ -113,9 +112,7 @@ public class FilmService {
     }
 
     public Collection<FilmDto> getListOfPopularFilms(Integer count) {
-        Collection<FilmDto> popularFilms = filmStorage.getAllFilms().stream()
-                .filter(film -> film.getLike() != null)
-                .sorted((film1, film2) -> Integer.compare(film2.getLike().size(), film1.getLike().size()))
+        Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream()
                 .limit(count == null ? 10 : count)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
@@ -157,36 +154,19 @@ public class FilmService {
     }
 
     private void filmValid(Film film) {
-        if (film.getName().isEmpty() || film.getName() == null) {
-            log.info("Название фильма не может быть пустым! Фильм: {}", film);
-            throw new ValidationException("Название фильма не может быть пустым!");
-        }
-        if (film.getDescription().length() > 200) {
-            log.info("Превышена максимальная длина описания фильма (200 символов). Фильм: {}", film);
-            throw new ValidationException("Превышена максимальная длина описания фильма (200 символов)");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, DECEMBER, 28))) {
-            log.info("Дата релиза фильма не может быть раньше 28 декабря 1895 года. Фильм: {}", film);
-            throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() < 0) {
-            log.info("Продолжительность фильма не может быть отрицательным числом. Фильм: {}", film);
-            throw new ValidationException("Продолжительность фильма не может быть отрицательным числом");
-        }
         Collection<Mpa> ratings = mpaStorage.getAllRatings();
         if (film.getMpa().getId() > ratings.size()) {
             log.info("Такого рейтинга нет в базе данных", film.getMpa().getId());
             throw new ValidationException("Такого рейтинга нет в базе данных");
+        }
+        if (!genreStorage.checkGenresExist(film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()))) {
+            throw new ValidationException("Один или несколько жанров не найдены в базе данных");
         }
     }
 
     private void checkValidService(User existUser, Film existFilm) {
         if (existUser == null) {
             throw new NotFoundException("Пользователь не найден");
-
-        }
-        if (existFilm.getLike() == null) {
-            throw new ValidationException("Лайки пользователя не найдены");
         }
     }
 }

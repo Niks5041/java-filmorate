@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.controller.Film;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.films.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -14,12 +17,12 @@ import java.util.Collection;
 @RequestMapping("/films")
 @Slf4j
 @AllArgsConstructor
+@Validated
 public class FilmController {
 
     private final FilmService filmService;
 
     @GetMapping("/{filmId}")
-    @ResponseStatus(HttpStatus.OK)
     public FilmDto getFilmById(@PathVariable Integer filmId) {
         log.info("Пришел GET запрос /films/{}", filmId);
         FilmDto film = filmService.getFilmById(filmId);
@@ -28,7 +31,6 @@ public class FilmController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public Collection<FilmDto> getAllFilms() {
         log.info("Пришел GET запрос /films");
         Collection<FilmDto> films = filmService.getAllFilms();
@@ -38,7 +40,7 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FilmDto addNewFilm(@RequestBody Film film) {
+    public FilmDto addNewFilm(@RequestBody @Valid Film film) {
         log.info("Пришел POST запрос /films с телом: {}", film);
         FilmDto addedFilm = filmService.addNewFilm(film);
         log.info("Отправлен ответ POST /films: {}", addedFilm);
@@ -46,8 +48,7 @@ public class FilmController {
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
-    public FilmDto updateFilm(@RequestBody Film updatedFilm) {
+    public FilmDto updateFilm(@RequestBody @Valid Film updatedFilm) {
         log.info("Пришел PUT запрос /films с телом: {}", updatedFilm);
         FilmDto updated = filmService.updateFilm(updatedFilm);
         log.info("Отправлен ответ PUT /films: {}", updated);
@@ -55,7 +56,6 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
         log.info("Пришел PUT запрос /films/{}/like/{}", filmId, userId);
         filmService.addNewLike(filmId, userId);
@@ -63,7 +63,6 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     public void deleteLike(@PathVariable Integer filmId, @PathVariable Integer userId) {
         log.info("Пришел DELETE запрос /films/{}/like/{}", filmId, userId);
         filmService.deleteLike(filmId, userId);
@@ -71,8 +70,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    @ResponseStatus(HttpStatus.OK)
-    public Collection<FilmDto> getListOfPopularFilms(@RequestParam int count) {
+    public Collection<FilmDto> getListOfPopularFilms(@Positive @RequestParam int count) {
         log.info("Пришел GET запрос /films/popular с параметром count={}", count);
         Collection<FilmDto> popularFilms = filmService.getListOfPopularFilms(count);
         log.info("Отправлен ответ GET /films/popular: {}", popularFilms);

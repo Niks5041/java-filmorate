@@ -22,6 +22,12 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
             "SET name = ?, birthday = ?, email = ?, login = ? " +
             "WHERE id = ?";
     private static final String FIND_USER_BY_ID = "SELECT * FROM \"user\" WHERE id = ?";
+    private static final String FIND_COMMON_FRIENDS =
+            "SELECT u.* " +
+                    "FROM \"user\" u " +
+                    "JOIN friends f1 ON u.id = f1.friend_id " +
+                    "JOIN friends f2 ON u.id = f2.friend_id " +
+                    "WHERE f1.user_id = ? AND f2.user_id = ?";
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -67,5 +73,12 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
     public User findUserById(Integer id) {
         log.info("Поиск пользователя по ID в базе данных {}", id);
         return findOne(FIND_USER_BY_ID, id);
+    }
+
+    public List<User> findCommonFriends(Integer userId1, Integer userId2) {
+        log.info("Поиск общих друзей между пользователями с ID {} и {}", userId1, userId2);
+        List<User> commonFriends = findMany(FIND_COMMON_FRIENDS, userId1, userId2);
+        log.info("Найдено {} общих друзей между пользователями с ID {} и {}", commonFriends.size(), userId1, userId2);
+        return commonFriends;
     }
  }
