@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.model.exception;
 
 public class ErrorResponse {
     private final String error;
-    private final String description;
+    private final Object description;
 
-    public ErrorResponse(String error, String description) {
+    public ErrorResponse(String error, Object description) {
         this.error = error;
         this.description = description;
     }
@@ -13,7 +13,7 @@ public class ErrorResponse {
         return error;
     }
 
-    public String getDescription() {
+    public Object getDescription() {
         return description;
     }
 }
