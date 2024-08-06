@@ -28,6 +28,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             " name = ?, description = ?, releaseDate = ?, duration = ?, mpa_id = ? WHERE id = ?";
     private static final String FIND_FILM = "SELECT * FROM film f LEFT JOIN mpa m ON f.mpa_id = m.id WHERE f.id = ?";
     private static final String DELETE_FILM_TO_GENRE = "DELETE FROM film_genre WHERE FILM_ID = ?";
+    private static final String DELETE_FILM = "DELETE FROM film WHERE ID = ?";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -87,5 +88,11 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     public Film findFilmById(Integer id) {
         log.info("Поиск фильма по ID в базе данных {}", id);
         return findOne(FIND_FILM, id);
+    }
+
+    @Override
+    public void deleteFilmById(Integer id) {
+        log.info("Удаление фильма с ID {} из базы данных", id);
+        delete(DELETE_FILM, id);
     }
  }
