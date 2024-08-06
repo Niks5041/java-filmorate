@@ -37,7 +37,11 @@ public class FilmService {
     public FilmDto getFilmById(Integer id) {
         log.info("Получаем фильм по id: {} из хранилища", id);
 
+
         Film film = filmStorage.findFilmById(id);
+        if (film == null) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
         genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
         Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(id));
@@ -45,9 +49,7 @@ public class FilmService {
         film.setGenres(genres);
         film.setMpa(mpa);
 
-        if (film == null) {
-            throw new NotFoundException("Фильм с id " + id + " не найден");
-        }
+
 
         return FilmMapper.mapToFilmDto(film);
     }
@@ -151,6 +153,10 @@ public class FilmService {
         log.info("Получаем список всех рейтингов из хранилища");
         Collection<Mpa> ratings = mpaStorage.getAllRatings();
         return ratings;
+    }
+    public void deleteFilmById(Integer id) {
+        filmStorage.deleteFilmById(id);
+        log.info("Фильм с ID {} удален из хранилища", id);
     }
 
     private void filmValid(Film film) {
