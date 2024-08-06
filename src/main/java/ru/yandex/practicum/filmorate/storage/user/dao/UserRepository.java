@@ -28,6 +28,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
                     "JOIN friends f1 ON u.id = f1.friend_id " +
                     "JOIN friends f2 ON u.id = f2.friend_id " +
                     "WHERE f1.user_id = ? AND f2.user_id = ?";
+    private static final String DELETE_USER = "DELETE FROM \"user\" WHERE ID = ?";
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -73,6 +74,11 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
     public User findUserById(Integer id) {
         log.info("Поиск пользователя по ID в базе данных {}", id);
         return findOne(FIND_USER_BY_ID, id);
+    }
+    @Override
+    public void deleteUserById(Integer id) {
+        log.info("Удаление пользователя с ID {} из базы данных", id);
+        delete(DELETE_USER, id);
     }
 
     public List<User> findCommonFriends(Integer userId1, Integer userId2) {

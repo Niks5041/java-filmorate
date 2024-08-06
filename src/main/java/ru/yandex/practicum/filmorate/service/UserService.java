@@ -86,6 +86,20 @@ public class UserService {
         return commonFriends;
     }
 
+    public void deleteUserById(Integer userId) {
+        log.info("Удаление пользователя с ID {}", userId);
+        userStorage.deleteUserById(userId);
+    }
+
+    public UserDto getUserById(Integer userId) {
+        log.info("Получаем пользователя с ID {}", userId);
+        User user = userStorage.findUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return UserMapper.mapToUserDto(user);
+    }
+
     private void checkValidService(User existUser, User newFriend) {
         if (existUser == null) {
             throw new NotFoundException("Пользователь не найден");
