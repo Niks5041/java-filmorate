@@ -35,7 +35,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
     }
 
     @Override
-        public Collection<User> getAllUsers() {
+    public Collection<User> getAllUsers() {
         log.info("Запрос на получение всех пользователей из базы данных");
         List<User> users = findMany(FIND_ALL_USERS);
         log.info("Получено {} пользователей из базы данных", users.size());
@@ -75,6 +75,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         log.info("Поиск пользователя по ID в базе данных {}", id);
         return findOne(FIND_USER_BY_ID, id);
     }
+
     @Override
     public void deleteUserById(Integer id) {
         log.info("Удаление пользователя с ID {} из базы данных", id);
@@ -87,4 +88,4 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         log.info("Найдено {} общих друзей между пользователями с ID {} и {}", commonFriends.size(), userId1, userId2);
         return commonFriends;
     }
- }
+}

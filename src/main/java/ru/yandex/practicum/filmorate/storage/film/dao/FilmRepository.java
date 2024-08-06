@@ -95,4 +95,4 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         log.info("Удаление фильма с ID {} из базы данных", id);
         delete(DELETE_FILM, id);
     }
- }
+}

@@ -50,7 +50,6 @@ public class FilmService {
         film.setMpa(mpa);
 
 
-
         return FilmMapper.mapToFilmDto(film);
     }
 
@@ -130,7 +129,7 @@ public class FilmService {
 
     public Genre getGenreById(Integer id) {
         log.info("Получаем информацию о жанре с ID {} из хранилища", id);
-       Genre genre = genreStorage.findGenreById(id);
+        Genre genre = genreStorage.findGenreById(id);
         if (genre != null) {
             return genre;
         } else {
@@ -154,6 +153,7 @@ public class FilmService {
         Collection<Mpa> ratings = mpaStorage.getAllRatings();
         return ratings;
     }
+
     public void deleteFilmById(Integer id) {
         filmStorage.deleteFilmById(id);
         log.info("Фильм с ID {} удален из хранилища", id);
