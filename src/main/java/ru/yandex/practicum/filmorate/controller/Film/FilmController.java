@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.Film;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

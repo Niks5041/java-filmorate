@@ -110,10 +110,10 @@ public class FilmService {
         log.info("Пользователь с ID {} удалил лайк с фильма с ID {}", userId, filmId);
     }
 
-    public Collection<FilmDto> getListOfPopularFilms(Integer count, Integer  genreId, Integer year) {
+    public Collection<FilmDto> getListOfPopularFilms(Integer count, Integer genreId, Integer year) {
         Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream()
-                .filter( film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId)))
-                .filter( film -> (year == 0) || (film.getReleaseDate().getYear() == year))
+                .filter(film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId)))
+                .filter(film -> (year == 0) || (film.getReleaseDate().getYear() == year))
                 //.limit(count == null ? 10 : count)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
