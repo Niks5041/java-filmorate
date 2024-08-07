@@ -70,9 +70,11 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getListOfPopularFilms(@Positive @RequestParam int count) {
-        log.info("Пришел GET запрос /films/popular с параметром count={}", count);
-        Collection<FilmDto> popularFilms = filmService.getListOfPopularFilms(count);
+    public Collection<FilmDto> getListOfPopularFilms(@Positive @RequestParam(defaultValue = "10") int count,
+                                                     @RequestParam(defaultValue = "0") int genreId,
+                                                     @RequestParam(defaultValue = "0") int year) {
+        log.info("Пришел GET запрос /films/popular с параметрами count={}, genreId={}, year={}", count, genreId, year);
+        Collection<FilmDto> popularFilms = filmService.getListOfPopularFilms(count, genreId, year);
         log.info("Отправлен ответ GET /films/popular: {}", popularFilms);
         return popularFilms;
     }
