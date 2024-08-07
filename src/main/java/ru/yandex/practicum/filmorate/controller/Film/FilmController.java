@@ -76,4 +76,11 @@ public class FilmController {
         log.info("Отправлен ответ GET /films/popular: {}", popularFilms);
         return popularFilms;
     }
+
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable Integer filmId) {
+        log.info("Пришел DELETE запрос /films/{}", filmId);
+        filmService.deleteFilmById(filmId);
+        log.info("Отправлен ответ DELETE /films/{}", filmId);
+    }
 }

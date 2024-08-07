@@ -80,4 +80,19 @@ public class UserController {
         log.info("Отправлен ответ GET /users/{}/friends/common/{}: {}", userId, otherId, commonFriends);
         return commonFriends;
     }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable Integer userId) {
+        log.info("Пришел DELETE запрос /users/{}", userId);
+        userService.deleteUserById(userId);
+        log.info("Отправлен ответ DELETE /users/{}", userId);
+    }
+
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable Integer userId) {
+        log.info("Пришел GET запрос /users/{}", userId);
+        UserDto user = userService.getUserById(userId);
+        log.info("Отправлен ответ GET /users/{}: {}", userId, user);
+        return user;
+    }
 }

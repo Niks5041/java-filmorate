@@ -78,5 +78,5 @@ public class GenreRepository extends BaseRepository<Genre> implements GenreStora
 
         return count != null && count.equals(genreIds.size());
     }
- }
+}
 
