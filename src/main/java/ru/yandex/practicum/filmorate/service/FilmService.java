@@ -42,13 +42,11 @@ public class FilmService {
         if (film == null) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
         }
-        genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
-        Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
-        Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(id));
-
-        film.setGenres(genres);
-        film.setMpa(mpa);
-
+        //genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
+        //Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
+        //Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(id));
+        //film.setGenres(genres);
+        //film.setMpa(mpa);
 
         return FilmMapper.mapToFilmDto(film);
     }
@@ -115,10 +113,13 @@ public class FilmService {
     public Collection<FilmDto> getListOfPopularFilms(Integer count, Integer  genreId, Integer year) {
         Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream()
                 .filter( film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId)))
-                .limit(count/* == null ? 10 : count*/)
+                .filter( film -> (year == 0) || (film.getReleaseDate().getYear() == year))
+                //.limit(count == null ? 10 : count)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
-
+        if (count != 0) {
+            popularFilms = popularFilms.stream().limit(count).collect(Collectors.toList());
+        }
         log.info("Отправлен список популярных фильмов: {}", popularFilms);
         return popularFilms;
     }

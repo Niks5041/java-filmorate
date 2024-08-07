@@ -16,15 +16,15 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     private static final String FIND_ALL_FILMS_POP = "SELECT F.*, M.NAME as mpa_name, COUNT (L.USER_ID) as likes, GROUP_CONCAT(G.ID) AS genres_ids, GROUP_CONCAT(G.NAME) AS genres " +
             "FROM FILM F " +
             "LEFT JOIN LIKES L ON F.ID = L.FILM_ID " +
-            "LEFT JOIN film_genres FG ON F.ID = FG.FILM_ID " +
-            "LEFT JOIN genre G ON FG.GENRE_ID = G.ID " +
+            "LEFT JOIN film_genre FG ON F.ID = FG.FILM_ID " +
+            "LEFT JOIN genres G ON FG.GENRE_ID = G.ID " +
             "LEFT JOIN MPA M ON F.MPA_ID = M.ID " +
             "GROUP BY F.ID " +
             "ORDER BY likes DESC;";
     private static final String FIND_ALL_FILMS = "select f.*, m.name as mpa_name, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
             "from film f " +
-            "left join film_genres fg on f.id = fg.film_id " +
-            "left join genre g on fg.genre_id = g.id " +
+            "left join film_genre fg on f.id = fg.film_id " +
+            "left join genres g on fg.genre_id = g.id " +
             "left join mpa m on f.mpa_id = m.id " +
             "group by f.id";
 
@@ -33,7 +33,13 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_FILM = "UPDATE film SET" +
             " name = ?, description = ?, releaseDate = ?, duration = ?, mpa_id = ? WHERE id = ?";
-    private static final String FIND_FILM = "SELECT * FROM film f LEFT JOIN mpa m ON f.mpa_id = m.id WHERE f.id = ?";
+    private static final String FIND_FILM = "select f.*, m.name as mpa_name, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
+            "from film f " +
+            "left join film_genre fg on f.id = fg.film_id " +
+            "left join genres g on fg.genre_id = g.id " +
+            "left join mpa m on f.mpa_id = m.id " +
+            "where f.id = ?" +
+            "group by f.id ";
     private static final String DELETE_FILM_TO_GENRE = "DELETE FROM film_genre WHERE FILM_ID = ?";
     private static final String DELETE_FILM = "DELETE FROM film WHERE ID = ?";
 
