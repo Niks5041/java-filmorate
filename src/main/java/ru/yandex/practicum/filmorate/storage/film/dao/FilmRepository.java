@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.film.dao;
 
+import java.util.Collection;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
 import ru.yandex.practicum.filmorate.model.films.Film;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-
-import java.util.List;
 
 @Slf4j
 @Repository
@@ -73,6 +75,17 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     // private static final String DELETE_FILM_TO_GENRE = "DELETE FROM film_genre WHERE FILM_ID = ?";
     private static final String DELETE_FILM_TO_DIRECTOR = "DELETE FROM film_director WHERE FILM_ID = ?";
     private static final String DELETE_FILM = "DELETE FROM film WHERE ID = ?";
+    private static final String FIND_FILM_BY_DIRECTOR = "";
+    private static final String FIND_FILM_BY_TITLE = "SELECT f.*, m.NAME AS mpa_name, group_concat(g.ID) AS " +
+            "genres_ids, group_concat(g.NAME) AS genres " +
+            "FROM film f " +
+            "LEFT JOIN likes l ON f.ID = l.FILM_ID " +
+            "LEFT JOIN film_genre fg ON f.ID = fg.FILM_ID " +
+            "LEFT JOIN genres g ON fg.GENRE_ID = g.ID " +
+            "LEFT JOIN mpa m ON f.MPA_ID = m.ID " +
+            "WHERE NAME LIKE '%' + ? + '%' " +
+            "GROUP BY f.ID " +
+            "ORDER BY COUNT(L.USER_ID) DESC;";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -147,6 +160,18 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     public Film findFilmById(Integer id) {
         log.info("Поиск фильма по ID в базе данных {}", id);
         return findOne(FIND_FILM, id);
+    }
+
+    @Override
+    public Collection<Film> findFilmsByDirector(String query) {
+        log.info("Поиск фильмов по режиссёру. Запрос {}", query);
+        return findMany(FIND_FILM_BY_DIRECTOR, query);
+    }
+
+    @Override
+    public Collection<Film> findFilmsByTitle(String query) {
+        log.info("Поиск фильмов по названию. Запрос {}", query);
+        return findMany(FIND_FILM_BY_TITLE, query);
     }
 
     @Override
