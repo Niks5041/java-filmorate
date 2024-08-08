@@ -1,8 +1,15 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
@@ -12,16 +19,13 @@ import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @AllArgsConstructor
 public class FilmService {
 
+    private static final String TITLE = "title";
+    private static final String DIRECTOR = "director";
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
@@ -191,6 +195,26 @@ public class FilmService {
         return popularFilms;
     }
 
+    public Collection<FilmDto> findFilmsBy(String query, String by) {
+        Set<FilmDto> result = new HashSet<>();
+        String normalBy = by.trim().toLowerCase();
+        if (normalBy.contains(DIRECTOR)) {
+            Collection<FilmDto> filmsByDirector =
+                    filmStorage.findFilmsByDirector(query).stream()
+                            .map(FilmMapper::mapToFilmDto)
+                            .collect(Collectors.toSet());
+            result.addAll(filmsByDirector);
+        }
+        if (normalBy.contains(TITLE)) {
+            Collection<FilmDto> filmsByTitle =
+                    filmStorage.findFilmsByTitle(query).stream()
+                            .map(FilmMapper::mapToFilmDto)
+                            .collect(Collectors.toSet());
+            result.addAll(filmsByTitle);
+        }
+        return result;
+    }
+
     public Collection<Genre> getAllGenres() {
         log.info("Получаем список всех жанров из хранилища");
         return genreStorage.getAllGenres();
@@ -245,5 +269,3 @@ public class FilmService {
         }
     }
 }
-
-

@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import ru.yandex.practicum.filmorate.model.films.Film;
-
 import java.util.Collection;
 import java.util.List;
+
+import ru.yandex.practicum.filmorate.model.films.Film;
 
 public interface FilmStorage {
     Collection<Film> getAllFilms();
@@ -21,6 +21,10 @@ public interface FilmStorage {
     List<Film> getAllFilmsByDirectorAndLikes(Integer id);
 
     List<Film> getAllFilmsByDirectorAndYear(Integer id);
+
+    Collection<Film> findFilmsByDirector(String query);
+
+    Collection<Film> findFilmsByTitle(String query);
 }
 
 
