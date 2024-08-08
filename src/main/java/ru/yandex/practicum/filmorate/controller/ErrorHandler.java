@@ -54,7 +54,7 @@ public class ErrorHandler {
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
             errors.add(violation.getMessage());
         }
-        return new  ErrorResponse("Validation failed", errors);
+        return new ErrorResponse("Validation failed", errors);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

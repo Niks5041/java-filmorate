@@ -1,8 +1,15 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
@@ -18,16 +25,13 @@ import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @AllArgsConstructor
 public class FilmService {
 
+    private static final String TITLE = "title";
+    private static final String DIRECTOR = "director";
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
@@ -37,17 +41,17 @@ public class FilmService {
     public FilmDto getFilmById(Integer id) {
         log.info("Получаем фильм по id: {} из хранилища", id);
 
+
         Film film = filmStorage.findFilmById(id);
-        genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
-        Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
-        Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(id));
-
-        film.setGenres(genres);
-        film.setMpa(mpa);
-
         if (film == null) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
         }
+        //genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors
+        // .toSet()));
+        //Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
+        //Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(id));
+        //film.setGenres(genres);
+        //film.setMpa(mpa);
 
         return FilmMapper.mapToFilmDto(film);
     }
@@ -64,7 +68,8 @@ public class FilmService {
         filmValid(film);
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.addNewFilm(film));
-        genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
+        genreStorage.addFilmToGenres(film.getId(),
+                film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
         Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(filmDto.getId()));
 
@@ -79,7 +84,8 @@ public class FilmService {
         filmValid(updatedFilm);
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.updateFilm(updatedFilm));
-        genreStorage.addFilmToGenres(updatedFilm.getId(), updatedFilm.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
+        genreStorage.addFilmToGenres(updatedFilm.getId(),
+                updatedFilm.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         Mpa mpa = mpaStorage.findRatingById(updatedFilm.getMpa().getId());
 
         filmDto.setMpa(mpa);
@@ -111,14 +117,38 @@ public class FilmService {
         log.info("Пользователь с ID {} удалил лайк с фильма с ID {}", userId, filmId);
     }
 
-    public Collection<FilmDto> getListOfPopularFilms(Integer count) {
+    public Collection<FilmDto> getListOfPopularFilms(Integer count, Integer genreId, Integer year) {
         Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream()
-                .limit(count == null ? 10 : count)
+                .filter(film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId)))
+                .filter(film -> (year == 0) || (film.getReleaseDate().getYear() == year))
+                //.limit(count == null ? 10 : count)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
-
+        if (count != 0) {
+            popularFilms = popularFilms.stream().limit(count).collect(Collectors.toList());
+        }
         log.info("Отправлен список популярных фильмов: {}", popularFilms);
         return popularFilms;
+    }
+
+    public Collection<FilmDto> findFilmsBy(String query, String by) {
+        Set<FilmDto> result = new HashSet<>();
+        String normalBy = by.trim().toLowerCase();
+        if (normalBy.contains(DIRECTOR)) {
+            Collection<FilmDto> filmsByDirector =
+                    filmStorage.findFilmsByDirector(query).stream()
+                            .map(FilmMapper::mapToFilmDto)
+                            .collect(Collectors.toSet());
+            result.addAll(filmsByDirector);
+        }
+        if (normalBy.contains(TITLE)) {
+            Collection<FilmDto> filmsByTitle =
+                    filmStorage.findFilmsByTitle(query).stream()
+                            .map(FilmMapper::mapToFilmDto)
+                            .collect(Collectors.toSet());
+            result.addAll(filmsByTitle);
+        }
+        return result;
     }
 
     public Collection<Genre> getAllGenres() {
@@ -128,7 +158,7 @@ public class FilmService {
 
     public Genre getGenreById(Integer id) {
         log.info("Получаем информацию о жанре с ID {} из хранилища", id);
-       Genre genre = genreStorage.findGenreById(id);
+        Genre genre = genreStorage.findGenreById(id);
         if (genre != null) {
             return genre;
         } else {
@@ -153,6 +183,11 @@ public class FilmService {
         return ratings;
     }
 
+    public void deleteFilmById(Integer id) {
+        filmStorage.deleteFilmById(id);
+        log.info("Фильм с ID {} удален из хранилища", id);
+    }
+
     private void filmValid(Film film) {
         Collection<Mpa> ratings = mpaStorage.getAllRatings();
         if (film.getMpa().getId() > ratings.size()) {
@@ -170,5 +205,3 @@ public class FilmService {
         }
     }
 }
-
-
