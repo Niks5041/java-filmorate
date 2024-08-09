@@ -21,11 +21,17 @@ public class ReviewService {
 
     public Review addNewReview(Review review) {
         log.info("Добавление нового отзыва: {}", review);
+        if (review.getFilmId() <= 0 || review.getUserId() <= 0) {
+            throw new NotFoundException("Неправильный id фильма или пользователя");
+        }
+        if (review.getFilmId() == 0 || review.getUserId() == 0) {
+            throw new NotFoundException("Неправильный id фильма или пользователя");
+        }
         return reviewStorage.addNewReview(review);
     }
 
     public Review updateReview(Review review) {
-        log.info("Обновление отзыва с id {}: {}", review.getId(), review);
+        log.info("Обновление отзыва с id {}: {}", review.getReviewId(), review);
         return reviewStorage.updateReview(review);
     }
 
