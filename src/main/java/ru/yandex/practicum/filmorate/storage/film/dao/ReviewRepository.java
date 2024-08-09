@@ -118,7 +118,7 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
     @Override
     @Transactional
     public void dislikeReview(int reviewId) {
-        String updateUsefulSql = "UPDATE review SET useful = useful - 1 WHERE id = ?";
+        String updateUsefulSql = "UPDATE review SET useful = useful - 2 WHERE id = ?";
         try {
             jdbc.update(updateUsefulSql, reviewId);
         } catch (DataIntegrityViolationException e) {
@@ -126,6 +126,8 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
             throw new RuntimeException("Не удалось добавить дизлайк из-за ошибки целостности данных", e);
         }
         log.info("Отзыв с id {} оценен отрицательно, счетчик полезности уменьшен", reviewId);
+        Review review = getReviewById(reviewId);
+        log.info(review.toString());
     }
 
     @Override
