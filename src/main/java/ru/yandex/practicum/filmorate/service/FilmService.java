@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.model.films.Genre;
 import ru.yandex.practicum.filmorate.model.films.Like;
 import ru.yandex.practicum.filmorate.model.films.Mpa;
 import ru.yandex.practicum.filmorate.model.users.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -27,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class FilmService {
-
+    private final ReviewStorage reviewStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
@@ -36,7 +33,6 @@ public class FilmService {
 
     public FilmDto getFilmById(Integer id) {
         log.info("Получаем фильм по id: {} из хранилища", id);
-
 
         Film film = filmStorage.findFilmById(id);
         if (film == null) {
@@ -55,10 +51,7 @@ public class FilmService {
 
     public Collection<FilmDto> getAllFilms() {
         log.info("Получаем список все фильмов из хранилища");
-        return filmStorage.getAllFilms()
-                .stream()
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+        return filmStorage.getAllFilms().stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
     }
 
     public FilmDto addNewFilm(Film film) {
@@ -113,10 +106,7 @@ public class FilmService {
     }
 
     public Collection<FilmDto> getListOfPopularFilms(Integer count) {
-        Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream()
-                .limit(count == null ? 10 : count)
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+        Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream().limit(count == null ? 10 : count).map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
 
         log.info("Отправлен список популярных фильмов: {}", popularFilms);
         return popularFilms;

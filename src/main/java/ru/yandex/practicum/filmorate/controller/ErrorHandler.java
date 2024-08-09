@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -66,6 +67,14 @@ public class ErrorHandler {
         return new ErrorResponse("Ошибка валидации параметров запроса", errors);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDataIntegrityViolation(final DataIntegrityViolationException e) {
+        return new ErrorResponse(
+                "Ошибка целостности данных",
+                "Нарушение ограничения целостности данных. Проверьте, что все внешние ключи корректны и существуют в базе данных."
+        );
+    }
 }
 
 
