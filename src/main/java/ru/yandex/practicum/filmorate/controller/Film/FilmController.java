@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.Film;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,6 +21,15 @@ public class FilmController {
 
     private final FilmService filmService;
 
+    @GetMapping("/director/{directorId}")
+    public Collection<FilmDto> getAllFilmsByDirector(@PathVariable Integer directorId,
+                                                     @RequestParam String[] sortBy) {
+        log.info("Пришел GET запрос /films/director/{} sortBy {}", directorId, sortBy);
+        Collection<FilmDto> films = filmService.getAllFilmsByDirector(directorId, sortBy);
+        log.info("Отправлен ответ GET /films/director/{} sortBy {}", films);
+        return films;
+    }
+
     @GetMapping("/{filmId}")
     public FilmDto getFilmById(@PathVariable Integer filmId) {
         log.info("Пришел GET запрос /films/{}", filmId);
@@ -41,7 +49,7 @@ public class FilmController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public FilmDto addNewFilm(@RequestBody @Valid Film film) {
-        log.info("Пришел POST запрос /films с телом: {}", film);
+        log.info("Пришел POST запрос на добавление /films с телом: {}", film);
         FilmDto addedFilm = filmService.addNewFilm(film);
         log.info("Отправлен ответ POST /films: {}", addedFilm);
         return addedFilm;
@@ -49,7 +57,7 @@ public class FilmController {
 
     @PutMapping
     public FilmDto updateFilm(@RequestBody @Valid Film updatedFilm) {
-        log.info("Пришел PUT запрос /films с телом: {}", updatedFilm);
+        log.info("Пришел PUT запрос на обновление /films с телом: {}", updatedFilm);
         FilmDto updated = filmService.updateFilm(updatedFilm);
         log.info("Отправлен ответ PUT /films: {}", updated);
         return updated;
@@ -70,9 +78,11 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getListOfPopularFilms(@Positive @RequestParam int count) {
-        log.info("Пришел GET запрос /films/popular с параметром count={}", count);
-        Collection<FilmDto> popularFilms = filmService.getListOfPopularFilms(count);
+    public Collection<FilmDto> getListOfPopularFilms(@RequestParam(defaultValue = "0") int count,
+                                                     @RequestParam(defaultValue = "0") int genreId,
+                                                     @RequestParam(defaultValue = "0") int year) {
+        log.info("Пришел GET запрос /films/popular с параметрами count={}, genreId={}, year={}", count, genreId, year);
+        Collection<FilmDto> popularFilms = filmService.getListOfPopularFilms(count, genreId, year);
         log.info("Отправлен ответ GET /films/popular: {}", popularFilms);
         return popularFilms;
     }
