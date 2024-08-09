@@ -49,7 +49,7 @@ public class GenreRepository extends BaseRepository<Genre> implements GenreStora
 
     @Override
     public List<Genre> getGenreByFilmId(Integer id) {
-        log.info("Получаем фильм c ID в базу данных жанров");
+        log.info("Получаем фильм c ID в базе данных жанров");
         return findMany(UPDATE_GENRE, id);
     }
 

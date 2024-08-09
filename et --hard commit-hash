@@ -1,0 +1,163 @@
+[33mcommit 25bf0437188f66d5b8755b7cc9f4c23c28d8d994[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32madd-director[m[33m)[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Thu Aug 8 20:29:08 2024 +0300
+
+    добавил задачу по режиссерам
+
+[33mcommit 1e6128f42826ae28e6e19a0f5c12aefba26896e3[m
+Merge: 765ff68 69e8825
+Author: Niks5041 <160326005+Niks5041@users.noreply.github.com>
+Date:   Wed Aug 7 19:21:43 2024 +0300
+
+    Merge pull request #12 from Niks5041/add-remove-endpoint
+    
+    Add remove endpoint
+
+[33mcommit 69e8825ba460a2e0d392851fb96b0f22011ae190[m[33m ([m[1;31morigin/add-remove-endpoint[m[33m)[m
+Author: Tim <timoty02@yandex.ru>
+Date:   Tue Aug 6 23:38:47 2024 +0300
+
+    codestyle
+
+[33mcommit 4258ea5e006565b6641cd2c3a5432e4eeef4f0fe[m
+Author: Tim <timoty02@yandex.ru>
+Date:   Tue Aug 6 22:51:20 2024 +0300
+
+    feat: полностью реализовать удаление и получение пользователя
+
+[33mcommit cf51878feeef975cf92b5b00c5fae89394fd83dd[m
+Author: Tim <timoty02@yandex.ru>
+Date:   Tue Aug 6 22:34:14 2024 +0300
+
+    feat: полностью реализовать удаление фильма
+
+[33mcommit 8e779f8916ba6dc7975f0c30dc50ebd3dab822fa[m
+Author: Tim <timoty02@yandex.ru>
+Date:   Tue Aug 6 22:25:22 2024 +0300
+
+    refactor:немного изменить структуру БД для упрощения дальнейших работ
+
+[33mcommit 765ff68b9678c6fb2e1bdca4d8de188faf9b60e2[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: c7011c9 e7f2a03
+Author: Niks5041 <160326005+Niks5041@users.noreply.github.com>
+Date:   Fri Aug 2 21:37:34 2024 +0300
+
+    Merge pull request #9 from Niks5041/add-database
+    
+    Add database
+
+[33mcommit e7f2a034884fb7c81116b2b329ba57cc1a2d4c91[m[33m ([m[1;31morigin/add-database[m[33m, [m[1;32madd-database[m[33m)[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Tue Jul 23 20:02:48 2024 +0300
+
+    3в 12 Т3
+
+[33mcommit fc5b917cd0338e6db552985aa196aae243e3bd9a[m
+Author: yuran <yuranorikov@gmail.com>
+Date:   Mon Jul 22 20:42:48 2024 +0300
+
+    update logic
+
+[33mcommit cbd733e1b9aab04ac2eea075ba564870d5d462e4[m
+Author: yuran <yuranorikov@gmail.com>
+Date:   Mon Jul 22 20:24:31 2024 +0300
+
+    update logic
+
+[33mcommit ed8b0637fe13e555d2663d8f361fc56458c13524[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Mon Jul 22 18:49:15 2024 +0300
+
+    2 В 12 тз
+
+[33mcommit fef4ac52a175db5ae62a44897852545ec0e1edf1[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Sun Jul 14 18:45:28 2024 +0300
+
+    1в 12 Т3
+
+[33mcommit 60d573d103d89714e5edc7824b7ee515e9f20343[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Sun Jul 7 16:12:37 2024 +0300
+
+    добавил диадиаграмму
+
+[33mcommit c7011c91ad96998c5258132687666f72574cee02[m
+Merge: d50d475 15f3d05
+Author: Nikson <nik504441@yandex.ru>
+Date:   Sat Jul 6 18:09:33 2024 +0300
+
+    Resolved merge conflicts
+
+[33mcommit 15f3d054d1f5e95578ef23451c2a8254c196f16a[m
+Merge: a09baed a3de715
+Author: Niks5041 <160326005+Niks5041@users.noreply.github.com>
+Date:   Sat Jul 6 18:01:29 2024 +0300
+
+    Merge pull request #7 from Niks5041/add-friends-likes
+    
+    Add friends likes
+
+[33mcommit a3de71502b5a0f99e075b912d40ced43122b4212[m[33m ([m[1;31morigin/add-friends-likes[m[33m, [m[1;32madd-friends-likes[m[33m)[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Fri Jun 28 18:16:22 2024 +0300
+
+    2в 11 Т3
+
+[33mcommit c15c101facb98c059c022824fa0f6b15e249bf28[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Thu Jun 27 13:37:30 2024 +0300
+
+    1в 11 Т3
+
+[33mcommit d50d47549e531ca19bcb02d156be87355f12ba63[m
+Merge: c39a76f a09baed
+Author: Nikson <nik504441@yandex.ru>
+Date:   Mon Jun 24 21:12:32 2024 +0300
+
+    азрешение конфликтов после слияния
+
+[33mcommit 6ec67d219d8f185508620522e5f64d66deff5aee[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Mon Jun 24 21:07:12 2024 +0300
+
+    к
+
+[33mcommit 086e903b0f22e4383c639a578091833ea9148b0d[m[33m ([m[1;31morigin/controllers-films-users[m[33m, [m[1;32mcontrollers-films-users[m[33m)[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Sun Jun 16 19:50:18 2024 +0300
+
+    3 версия 10 тз
+
+[33mcommit a09baedbc2d70df4146aac8a9ef37c5643488880[m
+Merge: ee5973f 874c8ba
+Author: Niks5041 <160326005+Niks5041@users.noreply.github.com>
+Date:   Sat Jun 15 16:26:11 2024 +0300
+
+    Merge pull request #6 from Niks5041/controllers-films-users
+    
+    10 ТЗ
+
+[33mcommit 874c8ba279d4237bfce6716b65621febebc7fd37[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Fri Jun 14 20:32:23 2024 +0300
+
+    2 версия 10 ТЗ
+
+[33mcommit 671ae3e0c1f6bd79be7c48661063fe0ba69c26c7[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Thu Jun 13 20:41:48 2024 +0300
+
+    1 версия 10 ТЗ
+
+[33mcommit c39a76f55e59398fe4d1cae554d48f0145162b69[m
+Author: Nikson <nik504441@yandex.ru>
+Date:   Thu Jun 13 20:41:48 2024 +0300
+
+    1 версия 10 ТЗ
+
+[33mcommit ee5973f34d3d192dab6bf0419359c923184c308b[m
+Author: Niks5041 <160326005+Niks5041@users.noreply.github.com>
+Date:   Tue Jun 11 21:02:49 2024 +0300
+
+    Initial commit
