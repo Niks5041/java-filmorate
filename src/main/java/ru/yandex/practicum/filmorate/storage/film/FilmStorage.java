@@ -25,6 +25,8 @@ public interface FilmStorage {
     Collection<Film> findFilmsByDirector(String query);
 
     Collection<Film> findFilmsByTitle(String query);
+
+    Collection<Film> findFilmsByTitleAndDirector(String query);
 }
 
 
