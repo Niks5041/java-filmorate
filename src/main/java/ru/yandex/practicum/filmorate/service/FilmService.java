@@ -82,13 +82,16 @@ public class FilmService {
                 throw new IllegalArgumentException("Unexpected value: " + param);
         }
 
-        return films.stream()
+        /*return films.stream()
                 .map(film -> {
                     Set<Director> directors = new LinkedHashSet<>(directorStorage.getDirectorByFilmId(film.getId()));
                     FilmDto filmDto = FilmMapper.mapToFilmDto(film);
                     filmDto.setDirectors(directors);
                     return filmDto;
                 })
+                .collect(Collectors.toList());*/
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
 
