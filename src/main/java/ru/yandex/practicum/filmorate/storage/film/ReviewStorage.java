@@ -19,11 +19,11 @@ public interface ReviewStorage {
 
     void deleteReviewById(Integer id);
 
-    void likeReview(int reviewId);
+    void likeReview(int reviewId, int userId);
 
-    void dislikeReview(int reviewId);
+    void dislikeReview(int reviewId, int userId);
 
-    void removeLike(int reviewId);
+    void removeLike(int reviewId, int userId);
 
-    void removeDislike(int reviewId);
+    void removeDislike(int reviewId, int userId);
 }

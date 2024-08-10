@@ -69,7 +69,6 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
             log.error("Ошибка целостности данных при добавлении отзыва", e);
             throw new RuntimeException("Не удалось добавить отзыв из-за ошибки целостности данных", e);
         }
-        //reviewId = insert(insertReviewSql, review.isPositive(), review.getUseful(), review.getContent(), review.getFilmId(), review.getUserId());
         review.setReviewId(reviewId);
         log.info("Добавлен новый отзыв с id {}", reviewId);
         return review;
@@ -104,10 +103,18 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
 
     @Override
     @Transactional
-    public void likeReview(int reviewId) {
+    public void likeReview(int reviewId, int userId) {
         String updateUsefulSql = "UPDATE review SET useful = useful + 1 WHERE id = ?";
+        String addReviewLikeSql = "INSERT INTO review_likes (review_id, user_id) VALUES (?, ?)";
+        if (isInteractedByUser(reviewId, userId)) {
+            if (!isInteractionPositive(reviewId, userId)) {
+                updateUsefulSql = "UPDATE review SET useful = useful + 2 WHERE id = ?";
+                addReviewLikeSql = "UPDATE review_likes SET is_positive = TRUE WHERE review_id = ? AND user_id = ?";
+            } else return;
+        }
         try {
             jdbc.update(updateUsefulSql, reviewId);
+            jdbc.update(addReviewLikeSql, reviewId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при добавлении лайка к отзыву с id {}", reviewId, e);
             throw new RuntimeException("Не удалось добавить лайк из-за ошибки целостности данных", e);
@@ -117,10 +124,18 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
 
     @Override
     @Transactional
-    public void dislikeReview(int reviewId) {
-        String updateUsefulSql = "UPDATE review SET useful = useful - 2 WHERE id = ?";
+    public void dislikeReview(int reviewId, int userId) {
+        String updateUsefulSql = "UPDATE review SET useful = useful - 1 WHERE id = ?";
+        String addReviewDislikeSql = "INSERT INTO review_likes (review_id, user_id) VALUES (?, ?)";
+        if (isInteractedByUser(reviewId, userId)) {
+            if (isInteractionPositive(reviewId, userId)) {
+                updateUsefulSql = "UPDATE review SET useful = useful - 2 WHERE id = ?";
+                addReviewDislikeSql = "UPDATE review_likes SET is_positive = FALSE WHERE review_id = ? AND user_id = ?";
+            } else return;
+        }
         try {
             jdbc.update(updateUsefulSql, reviewId);
+            jdbc.update(addReviewDislikeSql, reviewId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при добавлении дизлайка к отзыву с id {}", reviewId, e);
             throw new RuntimeException("Не удалось добавить дизлайк из-за ошибки целостности данных", e);
@@ -132,10 +147,15 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
 
     @Override
     @Transactional
-    public void removeLike(int reviewId) {
+    public void removeLike(int reviewId, int userId) {
         String updateUsefulSql = "UPDATE review SET useful = useful - 1 WHERE id = ?";
+        String removeReviewLikeSql = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
+        if (!isInteractedByUser(reviewId, userId)) {
+            return;
+        }
         try {
             jdbc.update(updateUsefulSql, reviewId);
+            jdbc.update(removeReviewLikeSql, reviewId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при удалении лайка с отзыва с id {}", reviewId, e);
             throw new RuntimeException("Не удалось удалить лайк из-за ошибки целостности данных", e);
@@ -145,14 +165,41 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
 
     @Override
     @Transactional
-    public void removeDislike(int reviewId) {
+    public void removeDislike(int reviewId, int userId) {
         String updateUsefulSql = "UPDATE review SET useful = useful + 1 WHERE id = ?";
+        String removeReviewLikeSql = "DELETE FROM review_likes WHERE review_id = ? AND user_id = ?";
+        if (!isInteractedByUser(reviewId, userId)) {
+            return;
+        }
         try {
             jdbc.update(updateUsefulSql, reviewId);
+            jdbc.update(removeReviewLikeSql, reviewId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при удалении дизлайка с отзыва с id {}", reviewId, e);
             throw new RuntimeException("Не удалось удалить дизлайк из-за ошибки целостности данных", e);
         }
-        log.info("Дизлайк убран с отзыва с id {}, счетчик полезности увеличен", reviewId);
+        log.info("Дизайк убран с отзыва с id {}, счетчик полезности уменьшен", reviewId);
+    }
+
+    private boolean isInteractedByUser(int reviewId, int userId) {
+        String findUserLikeSql = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ?";
+        try {
+            int count = jdbc.queryForObject(findUserLikeSql, new Object[]{reviewId, userId}, Integer.class);
+            return count > 0;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Ошибка целостности данных при проверке наличия лайка отзыва с id {}", reviewId, e);
+            throw new RuntimeException("Не удалось проверить наличие лайка из-за ошибки целостности данных", e);
+        }
+    }
+
+    private boolean isInteractionPositive(int reviewId, int userId) {
+        String findUserInteractionSql = "SELECT is_positive FROM review_likes WHERE review_id = ? AND user_id = ?";
+        try {
+            Boolean isPositive = jdbc.queryForObject(findUserInteractionSql, new Object[]{reviewId, userId}, Boolean.class);
+            return isPositive != null && isPositive;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Ошибка целостности данных при проверке is_positive отзыва с id {}", reviewId, e);
+            throw new RuntimeException("Не удалось проверить is_positive из-за ошибки целостности данных", e);
+        }
     }
 }

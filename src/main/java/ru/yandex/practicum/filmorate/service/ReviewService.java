@@ -60,28 +60,28 @@ public class ReviewService {
         validateReviewExists(reviewId);
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} поставил лайк отзыву с id {}", userId, reviewId);
-        reviewStorage.likeReview(reviewId);
+        reviewStorage.likeReview(reviewId, userId);
     }
 
     public void addDislike(Integer reviewId, Integer userId) {
         validateReviewExists(reviewId);
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} поставил дизлайк отзыву с id {}", userId, reviewId);
-        reviewStorage.dislikeReview(reviewId);
+        reviewStorage.dislikeReview(reviewId, userId);
     }
 
     public void removeLike(Integer reviewId, Integer userId) {
         validateReviewExists(reviewId);
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} убрал лайк у отзыва с id {}", userId, reviewId);
-        reviewStorage.removeLike(reviewId);
+        reviewStorage.removeLike(reviewId, userId);
     }
 
     public void removeDislike(Integer reviewId, Integer userId) {
         validateReviewExists(reviewId);
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} убрал дизлайк у отзыва с id {}", userId, reviewId);
-        reviewStorage.removeDislike(reviewId);
+        reviewStorage.removeDislike(reviewId, userId);
     }
 
     private void validateReviewExists(Integer reviewId) {
