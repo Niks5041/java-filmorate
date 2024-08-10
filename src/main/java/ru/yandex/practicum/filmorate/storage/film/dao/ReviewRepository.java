@@ -64,12 +64,13 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
         String insertReviewSql = "INSERT INTO review (is_positive, useful, content, film_id, user_id) VALUES (?, ?, ?, ?, ?)";
         int reviewId;
         try {
-            reviewId = insert(insertReviewSql, review.isPositive(), review.getUseful(), review.getContent(), review.getFilmId(), review.getUserId());
+            reviewId = insert(insertReviewSql, review.getIsPositive(), review.getUseful(), review.getContent(), review.getFilmId(), review.getUserId());
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при добавлении отзыва", e);
             throw new RuntimeException("Не удалось добавить отзыв из-за ошибки целостности данных", e);
         }
-        review.setId(reviewId);
+        //reviewId = insert(insertReviewSql, review.isPositive(), review.getUseful(), review.getContent(), review.getFilmId(), review.getUserId());
+        review.setReviewId(reviewId);
         log.info("Добавлен новый отзыв с id {}", reviewId);
         return review;
     }
@@ -78,13 +79,13 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
     public Review updateReview(Review updatedReview) {
         String updateReviewSql = "UPDATE review SET is_positive = ?, useful = ?, content = ? WHERE id = ?";
         try {
-            update(updateReviewSql, updatedReview.isPositive(), updatedReview.getUseful(), updatedReview.getContent(), updatedReview.getId());
+            update(updateReviewSql, updatedReview.getIsPositive(), updatedReview.getUseful(), updatedReview.getContent(), updatedReview.getReviewId());
         } catch (DataIntegrityViolationException e) {
-            log.error("Ошибка целостности данных при обновлении отзыва с id {}", updatedReview.getId(), e);
+            log.error("Ошибка целостности данных при обновлении отзыва с id {}", updatedReview.getReviewId(), e);
             throw new RuntimeException("Не удалось обновить отзыв из-за ошибки целостности данных", e);
         }
 
-        log.info("Отзыв с id {} обновлен", updatedReview.getId());
+        log.info("Отзыв с id {} обновлен", updatedReview.getReviewId());
         return updatedReview;
     }
 
@@ -117,7 +118,7 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
     @Override
     @Transactional
     public void dislikeReview(int reviewId) {
-        String updateUsefulSql = "UPDATE review SET useful = useful - 1 WHERE id = ?";
+        String updateUsefulSql = "UPDATE review SET useful = useful - 2 WHERE id = ?";
         try {
             jdbc.update(updateUsefulSql, reviewId);
         } catch (DataIntegrityViolationException e) {
@@ -125,6 +126,8 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
             throw new RuntimeException("Не удалось добавить дизлайк из-за ошибки целостности данных", e);
         }
         log.info("Отзыв с id {} оценен отрицательно, счетчик полезности уменьшен", reviewId);
+        Review review = getReviewById(reviewId);
+        log.info(review.toString());
     }
 
     @Override
