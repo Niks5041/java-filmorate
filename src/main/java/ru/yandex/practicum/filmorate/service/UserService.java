@@ -4,14 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.users.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,6 +24,8 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
 
     public Collection<UserDto> getAllUsers() {
         log.info("Получаем список всех пользователей из хранилища");
@@ -91,6 +96,39 @@ public class UserService {
         userStorage.deleteUserById(userId);
     }
 
+    public List<FilmDto> getRecommendations(Integer userId) {
+        log.info("Получение рекомендаций для пользователя с ID {}", userId);
+        Map<Integer, List<Integer>> likes = likeStorage.getLikes();
+        List<Integer> userLikes = likes.get(userId);
+        int maxSimilarityUserId = -1;
+        int maxSimilarity = -1;
+        if (userLikes != null) {
+            for (Map.Entry<Integer, List<Integer>> entry : likes.entrySet()) {
+                if (entry.getKey() != userId) {
+                    int similarity = calculateSimilarity(likes.get(userId), entry.getValue());
+                    if (similarity > maxSimilarity) {
+                        maxSimilarity = similarity;
+                        maxSimilarityUserId = entry.getKey();
+                    }
+                }
+            }
+            if (maxSimilarity == 0 || maxSimilarity == -1) {
+                return new ArrayList<>();
+            }
+            log.info("Пользователь с ID {} наиболее похож на пользователя с ID {}", userId, maxSimilarityUserId);
+            List<Integer> recommendedFilmsIds = likes.get(maxSimilarityUserId);
+            recommendedFilmsIds.removeAll(likes.get(userId));
+            List<FilmDto> recommendedFilms = new ArrayList<>();
+            for (Integer filmId : recommendedFilmsIds) {
+                recommendedFilms.add(FilmMapper.mapToFilmDto(filmStorage.findFilmById(filmId)));
+            }
+            return recommendedFilms;
+        } else {
+            return new ArrayList<>();
+        }
+
+    }
+
     public UserDto getUserById(Integer userId) {
         log.info("Получаем пользователя с ID {}", userId);
         User user = userStorage.findUserById(userId);
@@ -107,6 +145,13 @@ public class UserService {
         if (newFriend == null) {
             throw new NotFoundException("Друг пользователя не найден");
         }
+    }
+
+    private int calculateSimilarity(List<Integer> list1, List<Integer> list2) {
+        HashSet<Integer> set1 = new HashSet<>(list1);
+        HashSet<Integer> set2 = new HashSet<>(list2);
+        set1.retainAll(set2);
+        return set1.size();
     }
 }
 
