@@ -105,16 +105,16 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
     @Transactional
     public void likeReview(int reviewId, int userId) {
         String updateUsefulSql = "UPDATE review SET useful = useful + 1 WHERE id = ?";
-        String addReviewLikeSql = "INSERT INTO review_likes (review_id, user_id) VALUES (?, ?)";
+        String addReviewLikeSql = "INSERT INTO review_likes (review_id, user_id, is_positive) VALUES (?, ?, ?)";
         if (isInteractedByUser(reviewId, userId)) {
             if (!isInteractionPositive(reviewId, userId)) {
                 updateUsefulSql = "UPDATE review SET useful = useful + 2 WHERE id = ?";
                 addReviewLikeSql = "UPDATE review_likes SET is_positive = TRUE WHERE review_id = ? AND user_id = ?";
-            } else return;
-        }
+                jdbc.update(addReviewLikeSql, reviewId, userId);
+            } else jdbc.update(addReviewLikeSql, reviewId, userId, true);
+        } else jdbc.update(addReviewLikeSql, reviewId, userId, true);
         try {
             jdbc.update(updateUsefulSql, reviewId);
-            jdbc.update(addReviewLikeSql, reviewId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при добавлении лайка к отзыву с id {}", reviewId, e);
             throw new RuntimeException("Не удалось добавить лайк из-за ошибки целостности данных", e);
@@ -126,16 +126,16 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
     @Transactional
     public void dislikeReview(int reviewId, int userId) {
         String updateUsefulSql = "UPDATE review SET useful = useful - 1 WHERE id = ?";
-        String addReviewDislikeSql = "INSERT INTO review_likes (review_id, user_id) VALUES (?, ?)";
+        String addReviewDislikeSql = "INSERT INTO review_likes (review_id, user_id, is_positive) VALUES (?, ?, ?)";
         if (isInteractedByUser(reviewId, userId)) {
             if (isInteractionPositive(reviewId, userId)) {
                 updateUsefulSql = "UPDATE review SET useful = useful - 2 WHERE id = ?";
                 addReviewDislikeSql = "UPDATE review_likes SET is_positive = FALSE WHERE review_id = ? AND user_id = ?";
-            } else return;
-        }
+                jdbc.update(addReviewDislikeSql, reviewId, userId);
+            } else jdbc.update(addReviewDislikeSql, reviewId, userId, false);
+        } else jdbc.update(addReviewDislikeSql, reviewId, userId, false);
         try {
             jdbc.update(updateUsefulSql, reviewId);
-            jdbc.update(addReviewDislikeSql, reviewId, userId);
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при добавлении дизлайка к отзыву с id {}", reviewId, e);
             throw new RuntimeException("Не удалось добавить дизлайк из-за ошибки целостности данных", e);
