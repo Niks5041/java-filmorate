@@ -30,6 +30,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
                     "WHERE f1.user_id = ? AND f2.user_id = ?";
     private static final String DELETE_USER = "DELETE FROM \"user\" WHERE ID = ?";
 
+
     public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
     }
@@ -55,6 +56,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         log.info("Пользователь успешно добавлен с ID: {}", id);
         return user;
     }
+
 
     @Override
     public User updateUser(User updatedUser) {
