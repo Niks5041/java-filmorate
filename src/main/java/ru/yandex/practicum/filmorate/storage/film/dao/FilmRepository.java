@@ -1,20 +1,23 @@
 package ru.yandex.practicum.filmorate.storage.film.dao;
 
+import java.util.Collection;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
 import ru.yandex.practicum.filmorate.model.films.Film;
 import ru.yandex.practicum.filmorate.storage.BaseRepository;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-
-import java.util.List;
 
 @Slf4j
 @Repository
 public class FilmRepository extends BaseRepository<Film> implements FilmStorage {
     private static final String FIND_ALL_FILMS_BY_DIRECTOR_AND_YEAR =
-            "SELECT f.*, m.name as mpa_name, group_concat(d.id) as directors_ids, group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
+            "SELECT f.*, m.name as mpa_name, group_concat(d.id) as directors_ids, group_concat(d.name) as directors, " +
+                    "group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
                     "FROM film f " +
                     "left join film_genre fg on f.id = fg.film_id " +
                     "left join genres g on fg.genre_id = g.id " +
@@ -26,7 +29,9 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                     "GROUP BY f.id " +
                     "ORDER BY EXTRACT(YEAR FROM f.releaseDate) ASC";
     private static final String FIND_ALL_FILMS_BY_DIRECTOR_AND_LIKES =
-            "SELECT f.*, m.name as mpa_name, COUNT (L.USER_ID) as likes, group_concat(d.id) as directors_ids, group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
+            "SELECT f.*, m.name as mpa_name, COUNT (L.USER_ID) as likes, group_concat(d.id) as directors_ids, " +
+                    "group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name) as " +
+                    "genres " +
                     "FROM FILM f " +
                     "left join film_genre fg on f.id = fg.film_id " +
                     "left join genres g on fg.genre_id = g.id " +
@@ -37,7 +42,9 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                     "WHERE fd.director_id = ? " +
                     "GROUP BY f.id " +
                     "ORDER BY likes DESC;";
-    private static final String FIND_ALL_FILMS_POP = "SELECT F.*, M.NAME as mpa_name, COUNT (L.USER_ID) as likes, group_concat(d.id) as directors_ids, group_concat(d.name) as directors, GROUP_CONCAT(G.ID) AS genres_ids, GROUP_CONCAT(G.NAME) AS genres " +
+    private static final String FIND_ALL_FILMS_POP = "SELECT F.*, M.NAME as mpa_name, COUNT (L.USER_ID) as likes, " +
+            "group_concat(d.id) as directors_ids, group_concat(d.name) as directors, GROUP_CONCAT(G.ID) AS " +
+            "genres_ids, GROUP_CONCAT(G.NAME) AS genres " +
             "FROM FILM F " +
             "LEFT JOIN LIKES L ON F.ID = L.FILM_ID " +
             "LEFT JOIN film_genre FG ON F.ID = FG.FILM_ID " +
@@ -47,7 +54,9 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             "left JOIN director d ON fd.director_id = d.id " +
             "GROUP BY F.ID " +
             "ORDER BY likes DESC;";
-    private static final String FIND_ALL_FILMS = "select f.*, m.name as mpa_name, group_concat(d.id) as directors_ids, group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
+    private static final String FIND_ALL_FILMS = "select f.*, m.name as mpa_name, group_concat(d.id) as " +
+            "directors_ids, group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name)" +
+            " as genres " +
             "from film f " +
             "left join film_genre fg on f.id = fg.film_id " +
             "left join genres g on fg.genre_id = g.id " +
@@ -61,7 +70,8 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_FILM = "UPDATE film SET " +
             "name = ?, description = ?, releaseDate = ?, duration = ?, mpa_id = ? WHERE id = ?";
-    private static final String FIND_FILM = "select f.*, m.name as mpa_name, group_concat(d.id) as directors_ids, group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
+    private static final String FIND_FILM = "select f.*, m.name as mpa_name, group_concat(d.id) as directors_ids, " +
+            "group_concat(d.name) as directors, group_concat(g.id) as genres_ids, group_concat(g.name) as genres " +
             "from film f " +
             "left join film_genre fg on f.id = fg.film_id " +
             "left join genres g on fg.genre_id = g.id " +
@@ -71,8 +81,53 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             "where f.id = ? " +
             "group by f.id ";
     // private static final String DELETE_FILM_TO_GENRE = "DELETE FROM film_genre WHERE FILM_ID = ?";
-    private static final String DELETE_FILM_TO_DIRECTOR = "DELETE FROM film_director WHERE FILM_ID = ?";
-    private static final String DELETE_FILM = "DELETE FROM film WHERE ID = ?";
+    private static final String DELETE_FILM_TO_DIRECTOR =
+            "DELETE FROM film_director WHERE film_id = ?;";
+    private static final String DELETE_FILM =
+            "DELETE FROM film WHERE id = ?;";
+    private static final String FIND_FILM_BY_DIRECTOR =
+            "SELECT f.*, m.name AS mpa_name, GROUP_CONCAT(d.id) AS directors_ids, " +
+                    "GROUP_CONCAT(d.name) AS directors, GROUP_CONCAT(g.id) AS genres_ids, " +
+                    "GROUP_CONCAT(g.name) AS genres " +
+                    "FROM film f " +
+                    "LEFT JOIN likes l ON f.id = l.film_id " +
+                    "LEFT JOIN film_genre fg ON f.id = fg.film_id " +
+                    "LEFT JOIN genres g ON fg.genre_id = g.id " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                    "LEFT JOIN film_director fd ON f.id = fd.film_id " +
+                    "LEFT JOIN director d ON fd.director_id = d.id " +
+                    "WHERE d.name LIKE ? " +
+                    "GROUP BY f.id " +
+                    "ORDER BY COUNT(l.user_id) DESC;";
+    private static final String FIND_FILM_BY_TITLE =
+            "SELECT f.*, m.name AS mpa_name, GROUP_CONCAT(d.id) AS directors_ids, " +
+                    "GROUP_CONCAT(d.name) AS directors, GROUP_CONCAT(g.id) AS genres_ids, " +
+                    "GROUP_CONCAT(g.name) AS genres " +
+                    "FROM film f " +
+                    "LEFT JOIN likes l ON f.id = l.film_id " +
+                    "LEFT JOIN film_genre fg ON f.id = fg.film_id " +
+                    "LEFT JOIN genres g ON fg.genre_id = g.id " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                    "LEFT JOIN film_director fd ON f.id = fd.film_id " +
+                    "LEFT JOIN director d ON fd.director_id = d.id " +
+                    "WHERE f.name LIKE ? " +
+                    "GROUP BY f.id " +
+                    "ORDER BY COUNT(l.user_id) DESC;";
+    private static final String FIND_FILM_BY_TITLE_AND_DIRECTOR =
+            "SELECT f.*, m.name AS mpa_name, GROUP_CONCAT(d.id) AS directors_ids, " +
+                    "GROUP_CONCAT(d.name) AS directors, GROUP_CONCAT(g.id) AS genres_ids, " +
+                    "GROUP_CONCAT(g.name) AS genres " +
+                    "FROM film f " +
+                    "LEFT JOIN likes l ON f.id = l.film_id " +
+                    "LEFT JOIN film_genre fg ON f.id = fg.film_id " +
+                    "LEFT JOIN genres g ON fg.genre_id = g.id " +
+                    "LEFT JOIN mpa m ON f.mpa_id = m.id " +
+                    "LEFT JOIN film_director fd ON f.id = fd.film_id " +
+                    "LEFT JOIN director d ON fd.director_id = d.id " +
+                    "WHERE f.name LIKE ? " +
+                    "OR d.name LIKE ? " +
+                    "GROUP BY f.id " +
+                    "ORDER BY COUNT(l.user_id);";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -121,7 +176,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
                 film.getMpa().getId()
         );
         film.setId(id);
-        log.info("Фильм успешно добавлен с ID: {}", id, film);
+        log.info("Фильм успешно добавлен с ID: {}. Фильм: {}", id, film);
         return film;
     }
 
@@ -139,7 +194,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
 
         // delete(DELETE_FILM_TO_DIRECTOR, updatedFilm.getId());
 
-        log.info("Информация о фильме с ID {} успешно обновлена", updatedFilm.getId(), updatedFilm);
+        log.info("Информация о фильме с ID {} успешно обновлена: {}", updatedFilm.getId(), updatedFilm);
         return updatedFilm;
     }
 
@@ -147,6 +202,25 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     public Film findFilmById(Integer id) {
         log.info("Поиск фильма по ID в базе данных {}", id);
         return findOne(FIND_FILM, id);
+    }
+
+    @Override
+    public Collection<Film> findFilmsByDirector(String query) {
+        log.info("Поиск фильмов по режиссёру. Запрос {}", query);
+        return findMany(FIND_FILM_BY_DIRECTOR, "%" + query + "%");
+    }
+
+    @Override
+    public Collection<Film> findFilmsByTitle(String query) {
+        log.info("Поиск фильмов по названию. Запрос {}", query);
+        return findMany(FIND_FILM_BY_TITLE, "%" + query + "%");
+    }
+
+    @Override
+    public Collection<Film> findFilmsByTitleAndDirector(String query) {
+        log.info("Поиск фильмов по названию и по режиссёру. Запрос {}", query);
+        String likeQuery = "%" + query + "%";
+        return findMany(FIND_FILM_BY_TITLE_AND_DIRECTOR, likeQuery, likeQuery);
     }
 
     @Override
