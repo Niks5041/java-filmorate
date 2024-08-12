@@ -1,28 +1,19 @@
 package ru.yandex.practicum.filmorate.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.films.Director;
-import ru.yandex.practicum.filmorate.model.films.Film;
-import ru.yandex.practicum.filmorate.model.films.Genre;
-import ru.yandex.practicum.filmorate.model.films.Like;
-import ru.yandex.practicum.filmorate.model.films.Mpa;
+import ru.yandex.practicum.filmorate.model.films.*;
 import ru.yandex.practicum.filmorate.model.users.User;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -97,9 +88,7 @@ public class FilmService {
                     return filmDto;
                 })
                 .collect(Collectors.toList());*/
-        return films.stream()
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+        return films.stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
     }
 
     public FilmDto getFilmById(Integer id) {
@@ -115,10 +104,7 @@ public class FilmService {
 
     public Collection<FilmDto> getAllFilms() {
         log.info("Получаем список все фильмов из хранилища");
-        return filmStorage.getAllFilms()
-                .stream()
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+        return filmStorage.getAllFilms().stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
     }
 
     public FilmDto addNewFilm(Film film) {
@@ -126,10 +112,8 @@ public class FilmService {
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.addNewFilm(film));
 
-        genreStorage.addFilmToGenres(film.getId(),
-                film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
-        directorStorage.addFilmToDirector(film.getId(),
-                film.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()));
+        genreStorage.addFilmToGenres(film.getId(), film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
+        directorStorage.addFilmToDirector(film.getId(), film.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()));
 
         Mpa mpa = mpaStorage.findRatingById(film.getMpa().getId());
         Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(filmDto.getId()));
@@ -148,10 +132,8 @@ public class FilmService {
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.updateFilm(updatedFilm));
 
-        genreStorage.addFilmToGenres(updatedFilm.getId(),
-                updatedFilm.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
-        directorStorage.addFilmToDirector(updatedFilm.getId(),
-                updatedFilm.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()));
+        genreStorage.addFilmToGenres(updatedFilm.getId(), updatedFilm.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
+        directorStorage.addFilmToDirector(updatedFilm.getId(), updatedFilm.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()));
 
         Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(filmDto.getId()));
         Mpa mpa = mpaStorage.findRatingById(updatedFilm.getMpa().getId());
@@ -189,17 +171,20 @@ public class FilmService {
     }
 
     public Collection<FilmDto> getListOfPopularFilms(Integer count, Integer genreId, Integer year) {
-        Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream()
-                .filter(film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId)))
-                .filter(film -> (year == 0) || (film.getReleaseDate().getYear() == year))
+        Collection<FilmDto> popularFilms = filmStorage.getAllPopFilms().stream().filter(film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId))).filter(film -> (year == 0) || (film.getReleaseDate().getYear() == year))
                 //.limit(count == null ? 10 : count)
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+                .map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
         if (count != 0) {
             popularFilms = popularFilms.stream().limit(count).collect(Collectors.toList());
         }
         log.info("Отправлен список популярных фильмов: {}", popularFilms);
         return popularFilms;
+    }
+
+    public Collection<FilmDto> getCommonFilms(Integer userId, Integer friendId) {
+        Collection<FilmDto> commonFilms = filmStorage.getCommonFilms(userId, friendId).stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
+        log.info("Отправлен список общих фильмов: {}", commonFilms);
+        return commonFilms;
     }
 
     public Collection<FilmDto> findFilmsBy(String query, String by) {
@@ -208,14 +193,10 @@ public class FilmService {
             return filmStorage.findFilmsByTitleAndDirector(query).stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toSet());
         }
         if (normalBy.contains(DIRECTOR)) {
-            return filmStorage.findFilmsByDirector(query).stream()
-                    .map(FilmMapper::mapToFilmDto)
-                    .collect(Collectors.toSet());
+            return filmStorage.findFilmsByDirector(query).stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toSet());
         }
         if (normalBy.contains(TITLE)) {
-            return filmStorage.findFilmsByTitle(query).stream()
-                    .map(FilmMapper::mapToFilmDto)
-                    .collect(Collectors.toSet());
+            return filmStorage.findFilmsByTitle(query).stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toSet());
         }
         return new HashSet<>();
     }
