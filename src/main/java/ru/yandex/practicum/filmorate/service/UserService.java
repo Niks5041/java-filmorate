@@ -1,21 +1,28 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.users.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
+import ru.yandex.practicum.filmorate.storage.user.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,6 +33,7 @@ public class UserService {
     private final FriendStorage friendStorage;
     private final LikeStorage likeStorage;
     private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
 
     public Collection<UserDto> getAllUsers() {
         log.info("Получаем список всех пользователей из хранилища");
@@ -136,6 +144,11 @@ public class UserService {
             throw new NotFoundException("Пользователь не найден");
         }
         return UserMapper.mapToUserDto(user);
+    }
+
+    public Collection<Event> getFeeds(Integer userId) {
+        log.info("Получаем события пользователя с ID {}", userId);
+        return eventStorage.getEvents(userId);
     }
 
     private void checkValidService(User existUser, User newFriend) {
