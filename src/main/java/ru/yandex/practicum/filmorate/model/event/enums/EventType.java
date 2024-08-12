@@ -9,6 +9,10 @@ public enum EventType {
         this.value = value;
     }
 
+    public static EventType valueOf(int n) {
+        return EventType.values()[n - 1];
+    }
+
     public int getValue() {
         return value;
     }

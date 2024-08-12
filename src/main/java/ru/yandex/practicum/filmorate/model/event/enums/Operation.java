@@ -9,6 +9,10 @@ public enum Operation {
         this.value = value;
     }
 
+    public static Operation valueOf(int n) {
+        return Operation.values()[n - 1];
+    }
+
     public int getValue() {
         return value;
     }
