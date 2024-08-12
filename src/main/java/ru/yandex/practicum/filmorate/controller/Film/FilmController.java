@@ -1,26 +1,16 @@
 package ru.yandex.practicum.filmorate.controller.Film;
 
-import java.util.Collection;
-
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.films.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/films")
@@ -32,8 +22,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping("/director/{directorId}")
-    public Collection<FilmDto> getAllFilmsByDirector(@PathVariable Integer directorId,
-                                                     @RequestParam String[] sortBy) {
+    public Collection<FilmDto> getAllFilmsByDirector(@PathVariable Integer directorId, @RequestParam String[] sortBy) {
         log.info("Пришел GET запрос /films/director/{} sortBy {}", directorId, sortBy);
         Collection<FilmDto> films = filmService.getAllFilmsByDirector(directorId, sortBy);
         log.info("Отправлен ответ GET /films/director/{} sortBy {}", films);
@@ -88,9 +77,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getListOfPopularFilms(@RequestParam(defaultValue = "0") int count,
-                                                     @RequestParam(defaultValue = "0") int genreId,
-                                                     @RequestParam(defaultValue = "0") int year) {
+    public Collection<FilmDto> getListOfPopularFilms(@RequestParam(defaultValue = "0") int count, @RequestParam(defaultValue = "0") int genreId, @RequestParam(defaultValue = "0") int year) {
         log.info("Пришел GET запрос /films/popular с параметрами count={}, genreId={}, year={}", count, genreId, year);
         Collection<FilmDto> popularFilms = filmService.getListOfPopularFilms(count, genreId, year);
         log.info("Отправлен ответ GET /films/popular: {}", popularFilms);
@@ -98,8 +85,7 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public Collection<FilmDto> searchFilmsBy(@RequestParam(defaultValue = "") String query,
-                                             @RequestParam(defaultValue = "title,director") String by) {
+    public Collection<FilmDto> searchFilmsBy(@RequestParam(defaultValue = "") String query, @RequestParam(defaultValue = "title,director") String by) {
         log.info("Пришел GET запрос /films/search с параметрами query={}, by={}", query, by);
         Collection<FilmDto> films = filmService.findFilmsBy(query, by);
         log.info("Отправлен ответ GET /films/search: {}", films);
@@ -111,5 +97,13 @@ public class FilmController {
         log.info("Пришел DELETE запрос /films/{}", filmId);
         filmService.deleteFilmById(filmId);
         log.info("Отправлен ответ DELETE /films/{}", filmId);
+    }
+
+    @GetMapping("/common")
+    public Collection<FilmDto> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        log.info("Пришел GET запрос /films/common с параметрами userId={} и friendId={}", userId, friendId);
+        Collection<FilmDto> commonFilms = filmService.getCommonFilms(userId, friendId);
+        log.info("Отправлен ответ GET /films/common: {}", commonFilms);
+        return commonFilms;
     }
 }
