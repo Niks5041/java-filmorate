@@ -1,15 +1,19 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.event.enums.EventType;
+import ru.yandex.practicum.filmorate.model.event.enums.Operation;
 import ru.yandex.practicum.filmorate.model.films.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.ReviewStorage;
+import ru.yandex.practicum.filmorate.storage.user.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
-import java.util.Collection;
 
 @Slf4j
 @Service
@@ -18,6 +22,7 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
 
     public Review addNewReview(Review review) {
         log.info("Добавление нового отзыва: {}", review);
@@ -27,17 +32,23 @@ public class ReviewService {
         if (review.getFilmId() == 0 || review.getUserId() == 0) {
             throw new NotFoundException("Неправильный id фильма или пользователя");
         }
-        return reviewStorage.addNewReview(review);
+        Review newReview = reviewStorage.addNewReview(review);
+        eventStorage.addEvent(review.getUserId(), newReview.getReviewId(), EventType.REVIEW, Operation.ADD);
+        return newReview;
     }
 
     public Review updateReview(Review review) {
         log.info("Обновление отзыва с id {}: {}", review.getReviewId(), review);
-        return reviewStorage.updateReview(review);
+        Review updateReview = reviewStorage.updateReview(review);
+        eventStorage.addEvent(updateReview.getUserId(), updateReview.getReviewId(), EventType.REVIEW, Operation.UPDATE);
+        return updateReview;
     }
 
     public void deleteReviewById(Integer id) {
         log.info("Удаление отзыва с id: {}", id);
+        Review review = reviewStorage.getReviewById(id);
         reviewStorage.deleteReviewById(id);
+        eventStorage.addEvent(review.getUserId(), review.getReviewId(), EventType.REVIEW, Operation.REMOVE);
     }
 
     public Review getReviewById(Integer id) {
