@@ -1,33 +1,19 @@
 package ru.yandex.practicum.filmorate.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.films.Director;
-import ru.yandex.practicum.filmorate.model.films.Film;
-import ru.yandex.practicum.filmorate.model.films.Genre;
-import ru.yandex.practicum.filmorate.model.films.Like;
-import ru.yandex.practicum.filmorate.model.films.Mpa;
+import ru.yandex.practicum.filmorate.model.films.*;
 import ru.yandex.practicum.filmorate.model.users.User;
-import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -191,8 +177,8 @@ public class FilmService {
     public Collection<FilmDto> getListOfPopularFilms(Integer count, Integer genreId, Integer year) {
         Collection<FilmDto> popularFilms =
                 filmStorage.getAllPopFilms().stream().filter(film -> (genreId == 0) || (film.getGenres().stream().anyMatch(genre -> genre.getId() == genreId))).filter(film -> (year == 0) || (film.getReleaseDate().getYear() == year))
-                //.limit(count == null ? 10 : count)
-                .map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
+                        //.limit(count == null ? 10 : count)
+                        .map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
         if (count != 0) {
             popularFilms = popularFilms.stream().limit(count).collect(Collectors.toList());
         }

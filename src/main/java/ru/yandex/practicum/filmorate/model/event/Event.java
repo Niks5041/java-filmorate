@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.model.event;
 
-import java.sql.Timestamp;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-
 import ru.yandex.practicum.filmorate.model.event.enums.EventType;
 import ru.yandex.practicum.filmorate.model.event.enums.Operation;
+
+import java.sql.Timestamp;
 
 @Data
 public class Event {
