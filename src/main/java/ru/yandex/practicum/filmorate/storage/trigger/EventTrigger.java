@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.trigger;
 
+import org.h2.tools.TriggerAdapter;
+import ru.yandex.practicum.filmorate.model.event.enums.EventType;
+import ru.yandex.practicum.filmorate.model.event.enums.Operation;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.h2.tools.TriggerAdapter;
-
-import ru.yandex.practicum.filmorate.model.event.enums.EventType;
-import ru.yandex.practicum.filmorate.model.event.enums.Operation;
 
 public abstract class EventTrigger extends TriggerAdapter {
     private final String tableName;
