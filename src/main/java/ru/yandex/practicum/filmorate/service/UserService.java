@@ -107,6 +107,7 @@ public class UserService {
     public void deleteUserById(Integer userId) {
         log.info("Удаление пользователя с ID {}", userId);
         userStorage.deleteUserById(userId);
+        log.info("Пользователь с ID {} успешно удален", userId);
     }
 
     public List<FilmDto> getRecommendations(Integer userId) {
@@ -153,6 +154,10 @@ public class UserService {
 
     public Collection<Event> getFeeds(Integer userId) {
         log.info("Получаем события пользователя с ID {}", userId);
+        User user = userStorage.findUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         return eventStorage.getEvents(userId);
     }
 

@@ -22,6 +22,7 @@ public class DirectorRepository extends BaseRepository<Director> implements Dire
     private static final String UPDATE_DIRECTOR = "UPDATE director SET name = ? WHERE id = ?";
     private static final String DELETE_DIRECTOR = "DELETE FROM director WHERE ID = ?";
     private static final String ADD_FILM_TO_DIRECTOR = "INSERT INTO film_director (film_id, director_id) VALUES (?, ?)";
+    private static final String DELETE_FILM_FROM_DIRECTOR = "DELETE FROM film_director WHERE film_id = ?";
     private static final String FIND_DIRECTOR_BY_FILM_ID = "SELECT d.id, d.name " +
             "FROM director d " +
             "JOIN film_director fd ON d.id = fd.director_id " +
@@ -42,6 +43,11 @@ public class DirectorRepository extends BaseRepository<Director> implements Dire
         jdbc.batchUpdate(ADD_FILM_TO_DIRECTOR, batchParams);
 
         log.info("Фильм успешно добавлен к режиссерам");
+    }
+
+    public void deleteFilmFromDirector(int filmId) {
+        log.info("Удаление фильма с ID={} из режиссеров", filmId);
+        delete(DELETE_FILM_FROM_DIRECTOR, filmId);
     }
 
     @Override

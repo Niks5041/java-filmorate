@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.event.enums.EventType;
 import ru.yandex.practicum.filmorate.model.event.enums.Operation;
 
 public interface EventStorage {
+
     Collection<Event> getEvents(Integer userId);
 
     Integer addEvent(Integer userId, Integer entityId, EventType eventType, Operation operation);

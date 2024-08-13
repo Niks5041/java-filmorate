@@ -63,6 +63,9 @@ public class FilmService {
 
     public Director createDirector(Director director) {
         log.info("Добавляем нового режиссера в хранилище");
+        if (director.getName() == null || director.getName().isBlank()) {
+            throw new ValidationException("Имя режиссера не может быть пустым");
+        }
         Director director1 = directorStorage.addNewDirector(director);
         log.info("Добавлен новый режиссер в хранилище");
         return director1;
@@ -82,7 +85,10 @@ public class FilmService {
 
     public Collection<FilmDto> getAllFilmsByDirector(Integer id, String[] sortBy) {
         log.info("Получаем список всех фильмов режиссера с ID {} из хранилища", id);
-
+        Director director1 = directorStorage.findDirectorById(id);
+        if (director1 == null) {
+            throw new NotFoundException("Режиссер не найден");
+        }
         String param = sortBy[0];
         Collection<Film> films;
         switch (param) {
@@ -97,15 +103,6 @@ public class FilmService {
             default:
                 throw new IllegalArgumentException("Unexpected value: " + param);
         }
-
-        /*return films.stream()
-                .map(film -> {
-                    Set<Director> directors = new LinkedHashSet<>(directorStorage.getDirectorByFilmId(film.getId()));
-                    FilmDto filmDto = FilmMapper.mapToFilmDto(film);
-                    filmDto.setDirectors(directors);
-                    return filmDto;
-                })
-                .collect(Collectors.toList());*/
         return films.stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
     }
 
@@ -151,14 +148,15 @@ public class FilmService {
         filmValid(updatedFilm);
 
         FilmDto filmDto = FilmMapper.mapToFilmDto(filmStorage.updateFilm(updatedFilm));
-
+        genreStorage.deleteFilmFromGenres(filmDto.getId());
+        directorStorage.deleteFilmFromDirector(filmDto.getId());
         genreStorage.addFilmToGenres(updatedFilm.getId(),
                 updatedFilm.getGenres().stream().map(Genre::getId).collect(Collectors.toSet()));
         directorStorage.addFilmToDirector(updatedFilm.getId(),
                 updatedFilm.getDirectors().stream().map(Director::getId).collect(Collectors.toSet()));
 
-        Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(filmDto.getId()));
         Mpa mpa = mpaStorage.findRatingById(updatedFilm.getMpa().getId());
+        Set<Genre> genres = new LinkedHashSet<>(genreStorage.getGenreByFilmId(filmDto.getId()));
         Set<Director> directors = new LinkedHashSet<>(directorStorage.getDirectorByFilmId(filmDto.getId()));
 
         filmDto.setMpa(mpa);
