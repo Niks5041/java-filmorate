@@ -113,7 +113,7 @@ public class UserService {
         if (userLikes != null) {
             for (Map.Entry<Integer, List<Integer>> entry : likes.entrySet()) {
                 if (entry.getKey() != userId) {
-                    int similarity = calculateSimilarity(likes.get(userId), entry.getValue());
+                    int similarity = (int) userLikes.stream().filter(l -> entry.getValue().contains(l)).count();
                     if (similarity > maxSimilarity) {
                         maxSimilarity = similarity;
                         maxSimilarityUserId = entry.getKey();
