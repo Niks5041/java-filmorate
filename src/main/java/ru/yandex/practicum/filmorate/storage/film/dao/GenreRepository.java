@@ -23,6 +23,7 @@ public class GenreRepository extends BaseRepository<Genre> implements GenreStora
             "JOIN film_genre fg ON g.id = fg.genre_id " +
             "WHERE fg.film_id = ?";
     private static final String ADD_FILM_TO_GENRE = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
+    private static final String DELETE_FILM_FROM_GENRE = "DELETE FROM film_genre WHERE film_id = ?";
     private static final String CHECK_GENRES_EXIST = "SELECT COUNT(*) FROM genres WHERE id IN (:genreIds)";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -64,6 +65,11 @@ public class GenreRepository extends BaseRepository<Genre> implements GenreStora
         jdbc.batchUpdate(ADD_FILM_TO_GENRE, batchParams);
 
         log.info("Фильм успешно добавлен в жанры");
+    }
+
+    public void deleteFilmFromGenres(int filmId) {
+        log.info("Удаление фильма с ID={} из жанров", filmId);
+        delete(DELETE_FILM_FROM_GENRE, filmId);
     }
 
     public boolean checkGenresExist(Set<Integer> genreIds) {

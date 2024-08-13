@@ -25,4 +25,10 @@ public class EventRepository extends BaseRepository<Event> implements EventStora
         log.info("Получено {} событий из базы данных", events.size());
         return events;
     }
+
+    @Override
+    public void deleteEventsByUserId(Integer userId) {
+        log.info("Запрос на удаление всех событий пользователя: [{}] из базы данных", userId);
+        jdbc.update("DELETE FROM events WHERE user_id = ?", userId);
+    }
 }

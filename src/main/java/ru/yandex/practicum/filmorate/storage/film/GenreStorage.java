@@ -14,5 +14,7 @@ public interface GenreStorage {
 
     void addFilmToGenres(int filmId, Set<Integer> genreIds);
 
+    void deleteFilmFromGenres(int filmId);
+
     boolean checkGenresExist(Set<Integer> genreIds);
 }

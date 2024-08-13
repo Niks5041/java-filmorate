@@ -5,5 +5,7 @@ import ru.yandex.practicum.filmorate.model.event.Event;
 import java.util.Collection;
 
 public interface EventStorage {
+    void deleteEventsByUserId(Integer userId);
+
     Collection<Event> getEvents(Integer userId);
 }

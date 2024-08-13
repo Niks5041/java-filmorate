@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS friends
     user_id   INTEGER NOT NULL,
     friend_id INTEGER NOT NULL,
     constraint "user_friend_user_id_user_id_fk"
-        foreign key (user_id) references "user" (id) ON DELETE CASCADE,
+        foreign key (user_id) references "user" (id) ON UPDATE CASCADE ON DELETE CASCADE,
     constraint "user_friend_friend_id_user_id_fk"
-        foreign key (friend_id) references "user" (id) ON DELETE CASCADE
+        foreign key (friend_id) references "user" (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS likes
@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS likes
     user_id INTEGER,
     film_id INTEGER,
     constraint "user_like_user_id_user_id_fk"
-        foreign key (user_id) references "user" (id) ON DELETE CASCADE,
+        foreign key (user_id) references "user" (id) ON UPDATE CASCADE ON DELETE CASCADE,
     constraint "user_like_film_id_film_id_fk"
-        foreign key (film_id) references film (id) ON DELETE CASCADE
+        foreign key (film_id) references film (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS film_genre
@@ -69,9 +69,9 @@ CREATE TABLE IF NOT EXISTS film_genre
     film_id  INTEGER,
     genre_id INTEGER,
     constraint "film_genre_film_id_film_id_fk"
-        foreign key (film_id) references film (id) ON DELETE CASCADE,
+        foreign key (film_id) references film (id) ON UPDATE CASCADE ON DELETE CASCADE,
     constraint "film_genre_genre_id_genre_id_fk"
-        foreign key (genre_id) references genres (id) ON DELETE CASCADE
+        foreign key (genre_id) references genres (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS director
@@ -86,9 +86,9 @@ CREATE TABLE IF NOT EXISTS film_director
     film_id     INTEGER,
     director_id INTEGER,
     constraint "film_director_film_id_film_id_fk"
-        foreign key (film_id) references film (id) ON DELETE CASCADE,
+        foreign key (film_id) references film (id) ON UPDATE CASCADE ON DELETE CASCADE,
     constraint "film_director_director_id_director_id_fk"
-        foreign key (director_id) references director (id) ON DELETE CASCADE
+        foreign key (director_id) references director (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS review
@@ -100,9 +100,9 @@ CREATE TABLE IF NOT EXISTS review
     film_id     INTEGER,
     user_id     INTEGER,
     CONSTRAINT "review_film_id_film_id_fk"
-        FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE,
+        FOREIGN KEY (film_id) REFERENCES film (id) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT "review_user_id_user_id_fk"
-        FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES "user" (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS review_likes
@@ -112,9 +112,9 @@ CREATE TABLE IF NOT EXISTS review_likes
     user_id     INTEGER,
     review_id   INTEGER,
     CONSTRAINT "review_like_user_id_user_id_fk"
-        FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES "user" (id) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT "review_like_review_id_review_id_fk"
-        FOREIGN KEY (review_id) REFERENCES review (id) ON DELETE CASCADE
+        FOREIGN KEY (review_id) REFERENCES review (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS events
