@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.film.dao.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.enums.EventType;
 import ru.yandex.practicum.filmorate.model.event.enums.Operation;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Component
 public class EventRowMapper implements RowMapper<Event> {
