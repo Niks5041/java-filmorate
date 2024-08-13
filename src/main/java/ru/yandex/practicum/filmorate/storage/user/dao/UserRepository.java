@@ -46,6 +46,9 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
     @Override
     public User addNewUser(User user) {
         log.info("Добавление нового пользователя в базу данных: {}", user);
+        if  (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         int id = insert(ADD_NEW_USER,
                 user.getName(),
                 user.getBirthday(),
