@@ -1,19 +1,36 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.films.*;
+import ru.yandex.practicum.filmorate.model.event.enums.EventType;
+import ru.yandex.practicum.filmorate.model.event.enums.Operation;
+import ru.yandex.practicum.filmorate.model.films.Director;
+import ru.yandex.practicum.filmorate.model.films.Film;
+import ru.yandex.practicum.filmorate.model.films.Genre;
+import ru.yandex.practicum.filmorate.model.films.Like;
+import ru.yandex.practicum.filmorate.model.films.Mpa;
 import ru.yandex.practicum.filmorate.model.users.User;
-import ru.yandex.practicum.filmorate.storage.film.*;
+import ru.yandex.practicum.filmorate.storage.film.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.film.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
+import ru.yandex.practicum.filmorate.storage.user.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,6 +45,7 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
     private final DirectorStorage directorStorage;
+    private final EventStorage eventStorage;
 
     public Collection<Director> getAllDirectors() {
         log.info("Получаем список все режиссеров из хранилища");
@@ -158,6 +176,7 @@ public class FilmService {
         newLike.setUserId(existUser.getId());
         newLike.setFilmId(existFilm.getId());
         likeStorage.addLike(newLike);
+        eventStorage.addEvent(userId, filmId, EventType.LIKE, Operation.ADD);
 
         log.info("Пользователь с ID {} поставил лайк фильму с ID {}", userId, filmId);
     }
@@ -168,6 +187,7 @@ public class FilmService {
         checkValidService(existUser, existFilm);
 
         likeStorage.deleteLike(filmId, userId);
+        eventStorage.addEvent(userId, filmId, EventType.LIKE, Operation.REMOVE);
 
         log.info("Пользователь с ID {} удалил лайк с фильма с ID {}", userId, filmId);
     }
