@@ -72,6 +72,7 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} поставил лайк отзыву с id {}", userId, reviewId);
         reviewStorage.likeReview(reviewId, userId);
+        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     public void addDislike(Integer reviewId, Integer userId) {
@@ -79,6 +80,7 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} поставил дизлайк отзыву с id {}", userId, reviewId);
         reviewStorage.dislikeReview(reviewId, userId);
+        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     public void removeLike(Integer reviewId, Integer userId) {
@@ -86,6 +88,7 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} убрал лайк у отзыва с id {}", userId, reviewId);
         reviewStorage.removeLike(reviewId, userId);
+        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     public void removeDislike(Integer reviewId, Integer userId) {
@@ -93,6 +96,7 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} убрал дизлайк у отзыва с id {}", userId, reviewId);
         reviewStorage.removeDislike(reviewId, userId);
+        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     private void validateReviewExists(Integer reviewId) {
