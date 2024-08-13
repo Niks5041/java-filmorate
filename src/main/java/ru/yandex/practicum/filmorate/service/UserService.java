@@ -107,7 +107,6 @@ public class UserService {
     public void deleteUserById(Integer userId) {
         log.info("Удаление пользователя с ID {}", userId);
         userStorage.deleteUserById(userId);
-        eventStorage.deleteEventsByUserId(userId);
         log.info("Пользователь с ID {} успешно удален", userId);
     }
 

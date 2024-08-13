@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.event.enums.EventType;
 import ru.yandex.practicum.filmorate.model.event.enums.Operation;
 
 public interface EventStorage {
-    void deleteEventsByUserId(Integer userId);
 
     Collection<Event> getEvents(Integer userId);
 
