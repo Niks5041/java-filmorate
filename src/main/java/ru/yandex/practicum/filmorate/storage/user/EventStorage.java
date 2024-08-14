@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import java.util.Collection;
-
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.enums.EventType;
 import ru.yandex.practicum.filmorate.model.event.enums.Operation;
+
+import java.util.Collection;
 
 public interface EventStorage {
 
