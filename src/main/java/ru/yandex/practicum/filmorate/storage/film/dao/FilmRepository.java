@@ -56,19 +56,19 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             "GROUP_CONCAT(g.name) AS genres " + "FROM film f " + "LEFT JOIN likes l ON f.id = l.film_id " + "LEFT " +
             "JOIN film_genre fg ON f.id = fg.film_id " + "LEFT JOIN genres g ON fg.genre_id = g.id " + "LEFT JOIN mpa" +
             " m ON f.mpa_id = m.id " + "LEFT JOIN film_director fd ON f.id = fd.film_id " + "LEFT JOIN director d ON " +
-            "fd.director_id = d.id " + "WHERE d.name LIKE ? " + "GROUP BY f.id " + "ORDER BY COUNT(l.user_id) DESC;";
+            "fd.director_id = d.id " + "WHERE UPPER(d.name) LIKE UPPER(?) " + "GROUP BY f.id " + "ORDER BY COUNT(l.user_id) DESC;";
     private static final String FIND_FILM_BY_TITLE = "SELECT f.*, m.name AS mpa_name, GROUP_CONCAT(d.id) AS " +
             "directors_ids, " + "GROUP_CONCAT(d.name) AS directors, GROUP_CONCAT(g.id) AS genres_ids, " +
             "GROUP_CONCAT(g.name) AS genres " + "FROM film f " + "LEFT JOIN likes l ON f.id = l.film_id " + "LEFT " +
             "JOIN film_genre fg ON f.id = fg.film_id " + "LEFT JOIN genres g ON fg.genre_id = g.id " + "LEFT JOIN mpa" +
             " m ON f.mpa_id = m.id " + "LEFT JOIN film_director fd ON f.id = fd.film_id " + "LEFT JOIN director d ON " +
-            "fd.director_id = d.id " + "WHERE f.name LIKE ? " + "GROUP BY f.id " + "ORDER BY COUNT(l.user_id) DESC;";
+            "fd.director_id = d.id " + "WHERE UPPER(f.name) LIKE UPPER(?) " + "GROUP BY f.id " + "ORDER BY COUNT(l.user_id) DESC;";
     private static final String FIND_FILM_BY_TITLE_AND_DIRECTOR = "SELECT f.*, m.name AS mpa_name, GROUP_CONCAT(d.id)" +
             " AS directors_ids, " + "GROUP_CONCAT(d.name) AS directors, GROUP_CONCAT(g.id) AS genres_ids, " +
             "GROUP_CONCAT(g.name) AS genres " + "FROM film f " + "LEFT JOIN likes l ON f.id = l.film_id " + "LEFT " +
             "JOIN film_genre fg ON f.id = fg.film_id " + "LEFT JOIN genres g ON fg.genre_id = g.id " + "LEFT JOIN mpa" +
             " m ON f.mpa_id = m.id " + "LEFT JOIN film_director fd ON f.id = fd.film_id " + "LEFT JOIN director d ON " +
-            "fd.director_id = d.id " + "WHERE f.name LIKE ? " + "OR d.name LIKE ? " + "GROUP BY f.id " + "ORDER BY " +
+            "fd.director_id = d.id " + "WHERE UPPER(f.name) LIKE UPPER(?) " + "OR UPPER(d.name) LIKE UPPER(?) " + "GROUP BY f.id " + "ORDER BY " +
             "COUNT(l.user_id) DESC;";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {

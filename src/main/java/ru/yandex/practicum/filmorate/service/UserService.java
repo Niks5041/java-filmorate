@@ -153,6 +153,7 @@ public class UserService {
     }
 
     public Collection<Event> getFeeds(Integer userId) {
+        getUserById(userId);
         log.info("Получаем события пользователя с ID {}", userId);
         User user = userStorage.findUserById(userId);
         if (user == null) {

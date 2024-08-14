@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.Film;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class DirectorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Director createDirector(@RequestBody Director director) {
+    public Director createDirector(@RequestBody @Valid Director director) {
         log.info("Пришел POST запрос /directors с телом: {}", director);
         Director createdDirector = filmService.createDirector(director);
         log.info("Отправлен ответ POST /directors с телом: {}", createdDirector);
