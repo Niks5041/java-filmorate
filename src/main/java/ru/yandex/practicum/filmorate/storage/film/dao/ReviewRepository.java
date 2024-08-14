@@ -25,19 +25,19 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
 
     @Override
     public Collection<Review> getAllReviews() {
-        String sql = "SELECT r.id, r.is_positive, r.useful, r.content, r.film_id, r.user_id FROM review r";
+        String sql = "SELECT r.id, r.is_positive, r.useful, r.content, r.film_id, r.user_id FROM review r ORDER BY r.useful DESC";
         return findMany(sql);
     }
 
     @Override
     public Collection<Review> getAllFilmReviews(int filmId) {
-        String sql = "SELECT r.id, r.is_positive, r.useful, r.content, r.film_id, r.user_id FROM review r WHERE r.film_id = ?";
+        String sql = "SELECT r.id, r.is_positive, r.useful, r.content, r.film_id, r.user_id FROM review r WHERE r.film_id = ? ORDER BY r.useful DESC";
         return findMany(sql, filmId);
     }
 
     @Override
     public Collection<Review> getAllUserReviews(int userId) {
-        String sql = "SELECT r.id, r.is_positive, r.useful, r.content, r.film_id, r.user_id FROM review r WHERE r.user_id = ?";
+        String sql = "SELECT r.id, r.is_positive, r.useful, r.content, r.film_id, r.user_id FROM review r WHERE r.user_id = ? ORDER BY r.useful DESC";
         return findMany(sql, userId);
     }
 
