@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.event.enums.EventType;
 import ru.yandex.practicum.filmorate.model.event.enums.Operation;
@@ -11,8 +14,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
-import java.util.Collection;
 
 @Slf4j
 @Service
@@ -72,7 +73,6 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} поставил лайк отзыву с id {}", userId, reviewId);
         reviewStorage.likeReview(reviewId, userId);
-        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     public void addDislike(Integer reviewId, Integer userId) {
@@ -80,7 +80,6 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} поставил дизлайк отзыву с id {}", userId, reviewId);
         reviewStorage.dislikeReview(reviewId, userId);
-        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     public void removeLike(Integer reviewId, Integer userId) {
@@ -88,7 +87,6 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} убрал лайк у отзыва с id {}", userId, reviewId);
         reviewStorage.removeLike(reviewId, userId);
-        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     public void removeDislike(Integer reviewId, Integer userId) {
@@ -96,7 +94,6 @@ public class ReviewService {
         userStorage.findUserById(userId);
         log.info("Пользователь с id {} убрал дизлайк у отзыва с id {}", userId, reviewId);
         reviewStorage.removeDislike(reviewId, userId);
-        eventStorage.addEvent(userId, reviewId, EventType.REVIEW, Operation.UPDATE);
     }
 
     private void validateReviewExists(Integer reviewId) {
