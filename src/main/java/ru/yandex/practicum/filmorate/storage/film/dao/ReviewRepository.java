@@ -76,9 +76,9 @@ public class ReviewRepository extends BaseRepository<Review> implements ReviewSt
 
     @Override
     public Review updateReview(Review updatedReview) {
-        String updateReviewSql = "UPDATE review SET is_positive = ?, useful = ?, content = ? WHERE id = ?";
+        String updateReviewSql = "UPDATE review SET is_positive = ?, content = ? WHERE id = ?";
         try {
-            update(updateReviewSql, updatedReview.getIsPositive(), updatedReview.getUseful(), updatedReview.getContent(), updatedReview.getReviewId());
+            update(updateReviewSql, updatedReview.getIsPositive(), updatedReview.getContent(), updatedReview.getReviewId());
         } catch (DataIntegrityViolationException e) {
             log.error("Ошибка целостности данных при обновлении отзыва с id {}", updatedReview.getReviewId(), e);
             throw new RuntimeException("Не удалось обновить отзыв из-за ошибки целостности данных", e);
