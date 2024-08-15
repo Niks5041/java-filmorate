@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class Director {
     private Integer id;
-    @NotNull(message = "Имя режиссера не может быть пустым")
     @NotBlank(message = "Имя режиссера не может быть пустым")
     private String name;
 }
