@@ -40,28 +40,28 @@ public class FilmService {
 
     public Director getDirectorById(Integer id) {
         log.info("Получаем режиссера по id: {} из хранилища", id);
-        Director director1 = directorStorage.findDirectorById(id);
-        if (director1 == null) {
+        Director director = directorStorage.findDirectorById(id);
+        if (director == null) {
             throw new NotFoundException("Режиссер не найден");
         }
-        return director1;
+        return director;
     }
 
-    public Director createDirector(Director director) {
+    public Director createDirector(Director newDirector) {
         log.info("Добавляем нового режиссера в хранилище");
-        if (director.getName() == null || director.getName().isBlank()) {
+        if (newDirector.getName() == null || newDirector.getName().isBlank()) {
             throw new ValidationException("Имя режиссера не может быть пустым");
         }
-        Director director1 = directorStorage.addNewDirector(director);
+        Director director = directorStorage.addNewDirector(newDirector);
         log.info("Добавлен новый режиссер в хранилище");
-        return director1;
+        return director;
     }
 
     public Director updateDirector(Director updatedDirector) {
         log.info("Обновляем режиссера в хранилище");
-        Director director1 = directorStorage.updateDirector(updatedDirector);
+        Director director = directorStorage.updateDirector(updatedDirector);
         log.info("Обновлен режиссер в хранилище");
-        return director1;
+        return director;
     }
 
     public void deleteDirector(Integer id) {
@@ -71,8 +71,8 @@ public class FilmService {
 
     public Collection<FilmDto> getAllFilmsByDirector(Integer id, String[] sortBy) {
         log.info("Получаем список всех фильмов режиссера с ID {} из хранилища", id);
-        Director director1 = directorStorage.findDirectorById(id);
-        if (director1 == null) {
+        Director director = directorStorage.findDirectorById(id);
+        if (director == null) {
             throw new NotFoundException("Режиссер не найден");
         }
         String param = sortBy[0];
