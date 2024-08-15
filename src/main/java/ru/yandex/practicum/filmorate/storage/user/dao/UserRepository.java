@@ -28,13 +28,15 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
                     "JOIN friends f1 ON u.id = f1.friend_id " +
                     "JOIN friends f2 ON u.id = f2.friend_id " +
                     "WHERE f1.user_id = ? AND f2.user_id = ?";
+    private static final String DELETE_USER = "DELETE FROM \"user\" WHERE id = ?;";
+
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
     }
 
     @Override
-        public Collection<User> getAllUsers() {
+    public Collection<User> getAllUsers() {
         log.info("Запрос на получение всех пользователей из базы данных");
         List<User> users = findMany(FIND_ALL_USERS);
         log.info("Получено {} пользователей из базы данных", users.size());
@@ -44,6 +46,9 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
     @Override
     public User addNewUser(User user) {
         log.info("Добавление нового пользователя в базу данных: {}", user);
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         int id = insert(ADD_NEW_USER,
                 user.getName(),
                 user.getBirthday(),
@@ -54,6 +59,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         log.info("Пользователь успешно добавлен с ID: {}", id);
         return user;
     }
+
 
     @Override
     public User updateUser(User updatedUser) {
@@ -75,10 +81,16 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         return findOne(FIND_USER_BY_ID, id);
     }
 
+    @Override
+    public void deleteUserById(Integer id) {
+        log.info("Удаление пользователя с ID {} из базы данных", id);
+        delete(DELETE_USER, id);
+    }
+
     public List<User> findCommonFriends(Integer userId1, Integer userId2) {
         log.info("Поиск общих друзей между пользователями с ID {} и {}", userId1, userId2);
         List<User> commonFriends = findMany(FIND_COMMON_FRIENDS, userId1, userId2);
         log.info("Найдено {} общих друзей между пользователями с ID {} и {}", commonFriends.size(), userId1, userId2);
         return commonFriends;
     }
- }
+}

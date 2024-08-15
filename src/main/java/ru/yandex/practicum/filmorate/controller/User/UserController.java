@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.users.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
 import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
 
 import java.util.Collection;
@@ -79,5 +81,36 @@ public class UserController {
         List<UserDto> commonFriends = userService.getCommonFriendsList(userId, otherId);
         log.info("Отправлен ответ GET /users/{}/friends/common/{}: {}", userId, otherId, commonFriends);
         return commonFriends;
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable Integer userId) {
+        log.info("Пришел DELETE запрос /users/{}", userId);
+        userService.deleteUserById(userId);
+        log.info("Отправлен ответ DELETE /users/{}", userId);
+    }
+
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable Integer userId) {
+        log.info("Пришел GET запрос /users/{}", userId);
+        UserDto user = userService.getUserById(userId);
+        log.info("Отправлен ответ GET /users/{}: {}", userId, user);
+        return user;
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public List<FilmDto> getRecommendations(@PathVariable Integer userId) {
+        log.info("Пришел GET запрос /users/{}/recommendations", userId);
+        List<FilmDto> recommendations = userService.getRecommendations(userId);
+        log.info("Отправлен ответ GET /users/{}/recommendations: {}", userId, recommendations);
+        return recommendations;
+    }
+
+    @GetMapping("/{userId}/feed")
+    public Collection<Event> getEvents(@PathVariable Integer userId) {
+        log.info("Пришел GET запрос /users/{}/feed", userId);
+        Collection<Event> feeds = userService.getFeeds(userId);
+        log.info("Отправлен ответ GET /users/{}/feed: {}", userId, feeds);
+        return feeds;
     }
 }

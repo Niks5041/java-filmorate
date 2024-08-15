@@ -4,14 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.enums.EventType;
+import ru.yandex.practicum.filmorate.model.event.enums.Operation;
 import ru.yandex.practicum.filmorate.model.users.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.film.dto.FilmDto;
+import ru.yandex.practicum.filmorate.storage.user.EventStorage;
 import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.user.dto.UserDto;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,6 +28,9 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
 
     public Collection<UserDto> getAllUsers() {
         log.info("Получаем список всех пользователей из хранилища");
@@ -47,6 +57,7 @@ public class UserService {
         checkValidService(existUser, newFriend);
         log.info("Пользователь с ID {} отправил запрос на добавление в друзья к пользователю ID {}", userId, friendId);
         friendStorage.addFriendship(userId, friendId);
+        eventStorage.addEvent(userId, friendId, EventType.FRIEND, Operation.ADD);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
@@ -56,6 +67,7 @@ public class UserService {
         log.info("Пользователь с ID {} отправил запрос на удаление из друзей пользователя с ID {}", userId, friendId);
 
         friendStorage.deleteFriendship(userId, friendId);
+        eventStorage.addEvent(userId, friendId, EventType.FRIEND, Operation.REMOVE);
 
         log.info("Дружба между пользователями с ID {} и {} успешно удалена", userId, friendId);
     }
@@ -86,6 +98,64 @@ public class UserService {
         return commonFriends;
     }
 
+    public void deleteUserById(Integer userId) {
+        log.info("Удаление пользователя с ID {}", userId);
+        userStorage.deleteUserById(userId);
+        log.info("Пользователь с ID {} успешно удален", userId);
+    }
+
+    public List<FilmDto> getRecommendations(Integer userId) {
+        log.info("Получение рекомендаций для пользователя с ID {}", userId);
+        Map<Integer, List<Integer>> likes = likeStorage.getLikes();
+        List<Integer> userLikes = likes.get(userId);
+        int maxSimilarityUserId = -1;
+        int maxSimilarity = -1;
+        if (userLikes != null) {
+            for (Map.Entry<Integer, List<Integer>> entry : likes.entrySet()) {
+                if (!Objects.equals(entry.getKey(), userId)) {
+                    int similarity = (int) userLikes.stream().filter(l -> entry.getValue().contains(l)).count();
+                    if (similarity > maxSimilarity) {
+                        maxSimilarity = similarity;
+                        maxSimilarityUserId = entry.getKey();
+                    }
+                }
+            }
+            if (maxSimilarity == 0 || maxSimilarity == -1) {
+                return new ArrayList<>();
+            }
+            log.info("Пользователь с ID {} наиболее похож на пользователя с ID {}", userId, maxSimilarityUserId);
+            List<Integer> recommendedFilmsIds = likes.get(maxSimilarityUserId);
+            recommendedFilmsIds.removeAll(likes.get(userId));
+            List<FilmDto> recommendedFilms = new ArrayList<>();
+            for (Integer filmId : recommendedFilmsIds) {
+                recommendedFilms.add(FilmMapper.mapToFilmDto(filmStorage.findFilmById(filmId)));
+            }
+            return recommendedFilms;
+        } else {
+            return new ArrayList<>();
+        }
+
+    }
+
+    public UserDto getUserById(Integer userId) {
+        log.info("Получаем пользователя с ID {}", userId);
+        User user = userStorage.findUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return UserMapper.mapToUserDto(user);
+    }
+
+    public Collection<Event> getFeeds(Integer userId) {
+        getUserById(userId);
+        log.info("Получаем события пользователя с ID {}", userId);
+        User user = userStorage.findUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+        return eventStorage.getEvents(userId);
+    }
+
     private void checkValidService(User existUser, User newFriend) {
         if (existUser == null) {
             throw new NotFoundException("Пользователь не найден");
@@ -93,6 +163,13 @@ public class UserService {
         if (newFriend == null) {
             throw new NotFoundException("Друг пользователя не найден");
         }
+    }
+
+    private int calculateSimilarity(List<Integer> list1, List<Integer> list2) {
+        HashSet<Integer> set1 = new HashSet<>(list1);
+        HashSet<Integer> set2 = new HashSet<>(list2);
+        set1.retainAll(set2);
+        return set1.size();
     }
 }
 
